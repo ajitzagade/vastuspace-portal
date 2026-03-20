@@ -93,56 +93,17 @@ export default function BuildingScene({ modelUrl }: { modelUrl?: string }) {
   const [resolvedModelUrl, setResolvedModelUrl] = useState<string | null>(null)
 
   useEffect(() => {
-    let cancelled = false
+    // Demo mode: if the URL looks like a supported GLB/GLTF, try to render it immediately.
+    // This avoids brittle existence checks (HEAD/Range) that can prevent model rendering on hosts like Vercel.
+    const normalizedUrl = modelUrl ? modelUrl.split('?')[0].split('#')[0].toLowerCase() : ''
+    const isSupported = normalizedUrl.endsWith('.glb') || normalizedUrl.endsWith('.gltf')
 
-    async function checkModel() {
-      const normalizedUrl = modelUrl ? modelUrl.split('?')[0].split('#')[0].toLowerCase() : ''
-      const isSupported = normalizedUrl.endsWith('.glb') || normalizedUrl.endsWith('.gltf')
-
-      if (!modelUrl || !isSupported) {
-        setResolvedModelUrl(null)
-        return
-      }
-
-      // Only run the "does this exist?" check for local URLs served by Next.
-      // For remote URLs, `HEAD` might be blocked even though `GET` would work.
-      if (!modelUrl.startsWith('/')) {
-        setResolvedModelUrl(modelUrl)
-        return
-      }
-
-      try {
-        // Avoid noisy console errors when the GLB isn't present in `public/models`.
-        const headRes = await fetch(modelUrl, { method: 'HEAD', cache: 'no-store' })
-
-        if (headRes.ok) {
-          if (!cancelled) setResolvedModelUrl(modelUrl)
-          return
-        }
-
-        // Some hosts may block HEAD; fall back to a tiny ranged GET.
-        if (headRes.status === 405 || headRes.status === 403) {
-          const getRes = await fetch(modelUrl, {
-            method: 'GET',
-            headers: { Range: 'bytes=0-1023' },
-            cache: 'no-store',
-          })
-
-          const ok = getRes.ok || getRes.status === 206
-          if (!cancelled) setResolvedModelUrl(ok ? modelUrl : null)
-          return
-        }
-
-        if (!cancelled) setResolvedModelUrl(null)
-      } catch {
-        if (!cancelled) setResolvedModelUrl(null)
-      }
+    if (!modelUrl || !isSupported) {
+      setResolvedModelUrl(null)
+      return
     }
 
-    checkModel()
-    return () => {
-      cancelled = true
-    }
+    setResolvedModelUrl(modelUrl)
   }, [modelUrl])
 
   return (
