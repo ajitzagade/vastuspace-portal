@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { addAsset, getProjectById } from '@/lib/db'
+import { addAsset, deleteAsset, getProjectById } from '@/lib/db'
 import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase/admin'
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
@@ -132,4 +132,68 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   }
 
   return NextResponse.json(inserted, { status: 201 })
+}
+
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+  const contentType = req.headers.get('content-type') || ''
+  const bucketName = process.env.SUPABASE_ASSET_BUCKET || 'property-assets'
+
+  let assetId: string | null = null
+
+  if (contentType.includes('application/json')) {
+    const body = await req.json()
+    assetId = body?.asset_id || body?.assetId || null
+  } else {
+    const url = req.nextUrl
+    assetId = url.searchParams.get('asset_id')
+  }
+
+  if (!assetId) {
+    return NextResponse.json({ error: 'Missing asset_id' }, { status: 400 })
+  }
+
+  const project = await getProjectById(params.id)
+  if (!project) return NextResponse.json({ error: 'Project not found' }, { status: 404 })
+
+  if (!isSupabaseConfigured()) {
+    const ok = await deleteAsset(params.id, assetId)
+    return NextResponse.json({ ok, assetId }, { status: ok ? 200 : 404 })
+  }
+
+  const supabase = getSupabaseAdmin()
+
+  const { data: assetRow, error: assetError } = await supabase
+    .from('project_assets')
+    .select('id, project_id, storage_path')
+    .eq('id', assetId)
+    .eq('project_id', params.id)
+    .single()
+
+  if (assetError || !assetRow) {
+    return NextResponse.json({ error: 'Asset not found' }, { status: 404 })
+  }
+
+  // Remove file from public storage bucket (ignore not-found to support legacy rows).
+  try {
+    const { error: removeError } = await supabase.storage.from(bucketName).remove([assetRow.storage_path])
+    // Supabase can error if the object doesn't exist (e.g., legacy CDN-only rows).
+    if (removeError && !removeError.message.toLowerCase().includes('not found')) {
+      // Continue to delete metadata even if storage removal fails.
+      console.warn('Supabase storage remove failed:', removeError.message)
+    }
+  } catch (e) {
+    console.warn('Supabase storage remove threw:', e)
+  }
+
+  const { error: deleteError } = await supabase
+    .from('project_assets')
+    .delete()
+    .eq('id', assetId)
+    .eq('project_id', params.id)
+
+  if (deleteError) {
+    return NextResponse.json({ error: deleteError.message }, { status: 500 })
+  }
+
+  return NextResponse.json({ ok: true, assetId }, { status: 200 })
 }

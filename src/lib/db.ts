@@ -273,6 +273,15 @@ export async function addAsset(projectId: string, asset: Omit<ProjectAsset, 'id'
   return newAsset
 }
 
+export async function deleteAsset(projectId: string, assetId: string): Promise<boolean> {
+  const project = projects.find(p => p.id === projectId)
+  if (!project || !project.assets) return false
+
+  const before = project.assets.length
+  project.assets = project.assets.filter(a => a.id !== assetId)
+  return project.assets.length < before
+}
+
 export function slugToSubdomain(slug: string): string {
   return `http://localhost:3000/projects/${slug}`
 }

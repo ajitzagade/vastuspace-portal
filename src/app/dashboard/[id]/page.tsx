@@ -39,6 +39,31 @@ export default function ProjectEditorPage({ params }: { params: { id: string } }
   const [uploadSuccess, setUploadSuccess] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const handleDeleteAsset = async (assetId: string) => {
+    if (!project) return
+    const ok = window.confirm('Delete this asset? This cannot be undone.')
+    if (!ok) return
+
+    setUploading(true)
+    setUploadError('')
+    setUploadSuccess('')
+    try {
+      const res = await fetch(`/api/projects/${project.id}/assets?asset_id=${assetId}`, {
+        method: 'DELETE',
+      })
+
+      if (!res.ok) throw new Error('Delete failed')
+
+      setProject(p => (p ? { ...p, assets: (p.assets || []).filter(a => a.id !== assetId) } : p))
+      setUploadSuccess('Asset deleted.')
+      setTimeout(() => setUploadSuccess(''), 3000)
+    } catch {
+      setUploadError('Failed to delete asset.')
+    } finally {
+      setUploading(false)
+    }
+  }
+
   useEffect(() => {
     fetch('/api/projects')
       .then(r => r.json())
@@ -288,6 +313,15 @@ export default function ProjectEditorPage({ params }: { params: { id: string } }
                         )}
                       </div>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteAsset(asset.id)}
+                      className="text-ivory/30 hover:text-red-300 transition-colors"
+                      aria-label="Delete asset"
+                      title="Delete asset"
+                    >
+                      <Trash2 size={16} />
+                    </button>
                   </div>
                 ))}
               </div>
@@ -312,6 +346,15 @@ export default function ProjectEditorPage({ params }: { params: { id: string } }
                       <p className="text-ivory/70 text-xs truncate font-mono">{asset.metadata.original_name || 'model.glb'}</p>
                       <p className="text-gold/50 text-xs">3D Model · viewable in hero</p>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteAsset(asset.id)}
+                      className="text-ivory/30 hover:text-red-300 transition-colors"
+                      aria-label="Delete asset"
+                      title="Delete asset"
+                    >
+                      <Trash2 size={16} />
+                    </button>
                   </div>
                 ))}
               </div>
@@ -335,6 +378,15 @@ export default function ProjectEditorPage({ params }: { params: { id: string } }
                       <img src={asset.cdn_url} alt="" className="w-full h-full object-cover" />
                     </div>
                     <p className="text-ivory/60 text-xs truncate font-mono">{asset.metadata.original_name || 'floor-plan'}</p>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteAsset(asset.id)}
+                      className="ml-auto text-ivory/30 hover:text-red-300 transition-colors"
+                      aria-label="Delete asset"
+                      title="Delete asset"
+                    >
+                      <Trash2 size={16} />
+                    </button>
                   </div>
                 ))}
               </div>
