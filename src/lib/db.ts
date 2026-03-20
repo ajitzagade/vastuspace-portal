@@ -1,10 +1,6 @@
 // LOCAL DEV: In-memory store replacing Supabase
-// When you add Supabase credentials, swap these functions with real client calls
-
 import { Project, ProjectAsset, ProjectFormData } from '@/types'
 import { v4 as uuidv4 } from 'uuid'
-
-// ─── Seed Data ────────────────────────────────────────────────────────────────
 
 const SEED_PROJECTS: Project[] = [
   {
@@ -12,13 +8,7 @@ const SEED_PROJECTS: Project[] = [
     slug: 'marble-heights',
     name: 'Marble Heights',
     tagline: 'Above the city. Beyond imagination.',
-    brief: JSON.stringify({
-      type: 'doc',
-      content: [{
-        type: 'paragraph',
-        content: [{ type: 'text', text: 'An architectural statement rising 52 floors above the skyline. Marble Heights redefines luxury living with its flowing, organic facades inspired by the natural undulations of white Carrara marble. Each residence is a masterwork of considered design — where every angle captures light differently, every material tells a story.' }]
-      }]
-    }),
+    brief: 'An architectural statement rising 52 floors above the skyline. Marble Heights redefines luxury living with its flowing, organic facades inspired by the natural undulations of white Carrara marble. Each residence is a masterwork of considered design — where every angle captures light differently, every material tells a story of craft and intention.',
     location: { lat: 19.0760, lng: 72.8777, address: 'Bandra Kurla Complex', city: 'Mumbai', country: 'India' },
     amenities: {
       lifestyle: [
@@ -39,6 +29,11 @@ const SEED_PROJECTS: Project[] = [
         { id: '9', name: 'Airport Express Nearby', icon: '✈️' },
       ],
     },
+    testimonials: [
+      { id: 't1', name: 'Rajesh Mehta', role: 'Resident, 42nd Floor', text: 'Waking up above the clouds every morning is something I never thought possible in Mumbai. The attention to detail in every finish is extraordinary.', rating: 5 },
+      { id: 't2', name: 'Priya Sharma', role: 'Investor & Resident', text: 'VastuSpace delivered on every promise. The concierge team, the building quality, the views — it exceeds every expectation. A true landmark.', rating: 5 },
+      { id: 't3', name: 'Arjun Kapoor', role: 'Penthouse Owner', text: 'I\'ve lived in luxury properties across three continents. Marble Heights stands with the very best. The marble detailing alone is worth the visit.', rating: 5 },
+    ],
     price: '₹12.5 Cr onwards',
     bedrooms: 4,
     bathrooms: 4,
@@ -47,24 +42,10 @@ const SEED_PROJECTS: Project[] = [
     status: 'published',
     created_at: new Date().toISOString(),
     assets: [
-      {
-        id: 'a1', project_id: '1', type: 'image',
-        storage_path: 'projects/marble-heights/hero.jpg',
-        cdn_url: 'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1600&q=80',
-        metadata: { is_hero: true, order: 0 }, created_at: new Date().toISOString()
-      },
-      {
-        id: 'a2', project_id: '1', type: 'image',
-        storage_path: 'projects/marble-heights/interior1.jpg',
-        cdn_url: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&q=80',
-        metadata: { is_hero: false, order: 1 }, created_at: new Date().toISOString()
-      },
-      {
-        id: 'a3', project_id: '1', type: 'image',
-        storage_path: 'projects/marble-heights/interior2.jpg',
-        cdn_url: 'https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?w=1200&q=80',
-        metadata: { is_hero: false, order: 2 }, created_at: new Date().toISOString()
-      },
+      { id: 'a1', project_id: '1', type: 'image', storage_path: 'projects/marble-heights/hero.jpg', cdn_url: 'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1600&q=80', metadata: { is_hero: true, order: 0, original_name: 'hero.jpg' }, created_at: new Date().toISOString() },
+      { id: 'a2', project_id: '1', type: 'image', storage_path: 'projects/marble-heights/interior1.jpg', cdn_url: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&q=80', metadata: { is_hero: false, order: 1, original_name: 'interior1.jpg' }, created_at: new Date().toISOString() },
+      { id: 'a3', project_id: '1', type: 'image', storage_path: 'projects/marble-heights/interior2.jpg', cdn_url: 'https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?w=1200&q=80', metadata: { is_hero: false, order: 2, original_name: 'interior2.jpg' }, created_at: new Date().toISOString() },
+      { id: 'a4', project_id: '1', type: '3d_model', storage_path: 'projects/marble-heights/model.glb', cdn_url: '/models/sample-building.glb', metadata: { is_hero: false, order: 0, original_name: 'marble-heights-model.glb' }, created_at: new Date().toISOString() },
     ]
   },
   {
@@ -72,13 +53,7 @@ const SEED_PROJECTS: Project[] = [
     slug: 'ocean-vista',
     name: 'Ocean Vista',
     tagline: 'Where the horizon is yours.',
-    brief: JSON.stringify({
-      type: 'doc',
-      content: [{
-        type: 'paragraph',
-        content: [{ type: 'text', text: 'Perched on the cliffs above the Arabian Sea, Ocean Vista is a collection of 24 ultra-luxury residences. Designed by an internationally acclaimed architectural studio, each home frames the ocean as living art — a painting that changes with the tides, the seasons, the light.' }]
-      }]
-    }),
+    brief: 'Perched on the cliffs above the Arabian Sea, Ocean Vista is a collection of 24 ultra-luxury residences. Designed by an internationally acclaimed architectural studio, each home frames the ocean as living art — a painting that changes with the tides, the seasons, the light. Privacy, scale, and natural beauty converge.',
     location: { lat: 15.2993, lng: 74.1240, address: 'Dona Paula Heights', city: 'Goa', country: 'India' },
     amenities: {
       lifestyle: [
@@ -97,6 +72,10 @@ const SEED_PROJECTS: Project[] = [
         { id: '7', name: '15 min to Goa Airport', icon: '✈️' },
       ],
     },
+    testimonials: [
+      { id: 't1', name: 'Vikram Nair', role: 'Cliff Villa Owner', text: 'There is simply no better view in Goa. The sunsets from my terrace have become my daily ritual. Ocean Vista is not just a home — it is a way of life.', rating: 5 },
+      { id: 't2', name: 'Neha Patel', role: 'Investor', text: 'The VastuSpace team\'s professionalism made this the smoothest property purchase I\'ve experienced. The property itself is breathtaking.', rating: 5 },
+    ],
     price: '₹28 Cr onwards',
     bedrooms: 5,
     bathrooms: 6,
@@ -105,18 +84,8 @@ const SEED_PROJECTS: Project[] = [
     status: 'published',
     created_at: new Date().toISOString(),
     assets: [
-      {
-        id: 'b1', project_id: '2', type: 'image',
-        storage_path: 'projects/ocean-vista/hero.jpg',
-        cdn_url: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1600&q=80',
-        metadata: { is_hero: true, order: 0 }, created_at: new Date().toISOString()
-      },
-      {
-        id: 'b2', project_id: '2', type: 'image',
-        storage_path: 'projects/ocean-vista/interior1.jpg',
-        cdn_url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80',
-        metadata: { is_hero: false, order: 1 }, created_at: new Date().toISOString()
-      },
+      { id: 'b1', project_id: '2', type: 'image', storage_path: 'projects/ocean-vista/hero.jpg', cdn_url: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1600&q=80', metadata: { is_hero: true, order: 0, original_name: 'hero.jpg' }, created_at: new Date().toISOString() },
+      { id: 'b2', project_id: '2', type: 'image', storage_path: 'projects/ocean-vista/interior1.jpg', cdn_url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80', metadata: { is_hero: false, order: 1, original_name: 'interior1.jpg' }, created_at: new Date().toISOString() },
     ]
   },
   {
@@ -124,13 +93,7 @@ const SEED_PROJECTS: Project[] = [
     slug: 'verdant-manor',
     name: 'Verdant Manor',
     tagline: 'Nature, elevated.',
-    brief: JSON.stringify({
-      type: 'doc',
-      content: [{
-        type: 'paragraph',
-        content: [{ type: 'text', text: 'A symphony of biophilic design set within 12 acres of curated landscape. Verdant Manor challenges the boundary between architecture and nature — living walls cascade three stories, cantilevered terraces hover over reflecting pools, and every interior breathes with natural light and living greenery.' }]
-      }]
-    }),
+    brief: 'A symphony of biophilic design set within 12 acres of curated landscape. Verdant Manor challenges the boundary between architecture and nature — living walls cascade three stories, cantilevered terraces hover over reflecting pools, and every interior breathes with natural light and living greenery.',
     location: { lat: 12.9716, lng: 77.5946, address: 'Whitefield', city: 'Bangalore', country: 'India' },
     amenities: {
       lifestyle: [
@@ -149,29 +112,23 @@ const SEED_PROJECTS: Project[] = [
         { id: '7', name: 'Near ITPL Tech Park', icon: '💼' },
       ],
     },
+    testimonials: [
+      { id: 't1', name: 'Suresh Iyengar', role: 'Garden Villa Owner', text: 'I walk through my garden every morning and still cannot believe this is my home. The Japanese garden alone took my breath away. Nature and luxury, perfectly balanced.', rating: 5 },
+    ],
     price: '₹8.5 Cr onwards',
     bedrooms: 3,
     bathrooms: 3,
     area_sqft: 3100,
     year_completion: '2026',
-    status: 'draft',
+    status: 'published',
     created_at: new Date().toISOString(),
     assets: [
-      {
-        id: 'c1', project_id: '3', type: 'image',
-        storage_path: 'projects/verdant-manor/hero.jpg',
-        cdn_url: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1600&q=80',
-        metadata: { is_hero: true, order: 0 }, created_at: new Date().toISOString()
-      },
+      { id: 'c1', project_id: '3', type: 'image', storage_path: 'projects/verdant-manor/hero.jpg', cdn_url: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1600&q=80', metadata: { is_hero: true, order: 0, original_name: 'hero.jpg' }, created_at: new Date().toISOString() },
     ]
   }
 ]
 
-// ─── In-Memory Store ──────────────────────────────────────────────────────────
-
 let projects: Project[] = [...SEED_PROJECTS]
-
-// ─── API Functions (swap with Supabase later) ─────────────────────────────────
 
 export async function getProjects(): Promise<Project[]> {
   return [...projects]
@@ -193,7 +150,6 @@ export async function createProject(data: ProjectFormData): Promise<Project> {
     .replace(/-+/g, '-')
     .trim()
 
-  // Ensure slug uniqueness
   let finalSlug = slug
   let counter = 1
   while (projects.find(p => p.slug === finalSlug)) {
@@ -208,6 +164,7 @@ export async function createProject(data: ProjectFormData): Promise<Project> {
     brief: data.brief,
     location: data.location,
     amenities: data.amenities,
+    testimonials: [],
     price: data.price,
     bedrooms: parseInt(data.bedrooms) || undefined,
     bathrooms: parseInt(data.bathrooms) || undefined,
@@ -225,7 +182,6 @@ export async function createProject(data: ProjectFormData): Promise<Project> {
 export async function updateProject(id: string, data: Partial<ProjectFormData>): Promise<Project | null> {
   const idx = projects.findIndex(p => p.id === id)
   if (idx === -1) return null
-
   projects[idx] = {
     ...projects[idx],
     ...data,

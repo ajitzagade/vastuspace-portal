@@ -20,7 +20,7 @@ const EMPTY_FORM: ProjectFormData = {
   status: 'draft',
 }
 
-const STEPS = ['Basics', 'Details', 'Amenities', 'Review']
+const STEPS = ['Basics', 'Details', 'Amenities', 'Media', 'Review']
 
 export default function NewProjectPage() {
   const router = useRouter()
@@ -223,7 +223,34 @@ export default function NewProjectPage() {
           </div>
         )}
 
+
         {step === 3 && (
+          <div className="space-y-5">
+            <div className="border border-gold/10 rounded-sm p-4 bg-gold/5">
+              <p className="text-ivory/50 text-xs font-mono leading-relaxed">
+                💡 Images and 3D models can be added after creating the project from the project editor. 
+                You can preview the project and come back to upload assets at any time.
+              </p>
+            </div>
+            <Field label="Hero Image URL (optional)">
+              <input className="input-luxury" placeholder="https://images.unsplash.com/..." 
+                onChange={e => update('brief', form.brief)} />
+            </Field>
+            <Field label="3D Model URL (optional)">
+              <input className="input-luxury" placeholder="https://cdn.example.com/model.glb" />
+              <p className="text-ivory/30 text-xs mt-1.5 font-mono">Accepts .glb, .gltf, .obj — shown in the interactive hero section</p>
+            </Field>
+            <div className="glass rounded-sm border border-gold/10 p-4">
+              <p className="text-gold text-xs tracking-widest uppercase mb-2">After creating the project</p>
+              <p className="text-ivory/40 text-xs leading-relaxed">
+                Use the project editor to drag-and-drop images, upload full 3D models, add floor plans, and set the hero image. 
+                All asset management is available from the dashboard once the project is created.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {step === 4 && (
           <div className="glass rounded-lg border border-gold/20 p-6 space-y-4">
             <h3 className="font-display text-2xl text-ivory font-light">{form.name || '(No name)'}</h3>
             {form.tagline && <p className="text-ivory/60 italic font-display">{form.tagline}</p>}
@@ -264,7 +291,7 @@ export default function NewProjectPage() {
         {step < STEPS.length - 1 ? (
           <button
             onClick={() => setStep(s => s + 1)}
-            disabled={step === 0 && !form.name}
+            disabled={(step === 0 && !form.name)}
             className="btn-gold flex items-center gap-2 text-xs disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Continue <ArrowRight size={14} />

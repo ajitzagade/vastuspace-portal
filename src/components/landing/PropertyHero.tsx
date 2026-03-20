@@ -1,13 +1,10 @@
 'use client'
 
-import { Suspense, useRef } from 'react'
+import { useRef } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
-import { Canvas } from '@react-three/fiber'
-import { OrbitControls, Environment, Float, Text3D, Center } from '@react-three/drei'
 import { Project } from '@/types'
 import dynamic from 'next/dynamic'
 
-// Dynamically import 3D scene to avoid SSR issues
 const Scene3D = dynamic(() => import('@/components/3d/BuildingScene'), { ssr: false })
 
 export default function PropertyHero({ project }: { project: Project }) {
@@ -18,26 +15,24 @@ export default function PropertyHero({ project }: { project: Project }) {
   const heroOpacity = useTransform(scrollY, [0, 500], [1, 0])
 
   const heroAsset = project.assets?.find(a => a.metadata.is_hero)
+  const model3D = project.assets?.find(a => a.type === '3d_model')
   const heroImage = heroAsset?.cdn_url || 'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1600&q=80'
 
   return (
     <section ref={heroRef} className="relative min-h-screen flex items-end overflow-hidden">
 
       {/* Background hero image with parallax */}
-      <motion.div
-        style={{ y: heroImageY }}
-        className="absolute inset-0 scale-110"
-      >
-        <img src={heroImage} alt={project.name}
-          className="w-full h-full object-cover" />
-        {/* Gradient overlays */}
+      <motion.div style={{ y: heroImageY }} className="absolute inset-0 scale-110">
+        <img src={heroImage} alt={project.name} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/40 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-obsidian/60 via-transparent to-transparent" />
       </motion.div>
 
-      {/* 3D Canvas - floating building model */}
-      <div className="absolute inset-0 z-10">
-        <Scene3D />
+      {/* 3D Canvas — pointer-events set to allow drag on canvas only */}
+      <div className="absolute inset-0 z-10 pointer-events-none">
+        <div className="absolute right-0 top-0 w-1/2 h-full pointer-events-auto">
+          <Scene3D modelUrl={model3D?.cdn_url} />
+        </div>
       </div>
 
       {/* Hero text */}
@@ -45,7 +40,6 @@ export default function PropertyHero({ project }: { project: Project }) {
         style={{ y: heroTextY, opacity: heroOpacity }}
         className="relative z-20 px-8 pb-20 max-w-7xl w-full"
       >
-        {/* Location pill */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -56,9 +50,13 @@ export default function PropertyHero({ project }: { project: Project }) {
           <span className="text-gold/80 text-xs tracking-[0.3em] uppercase font-mono">
             {project.location?.city || 'India'} · {project.year_completion || '2026'}
           </span>
+          {project.assets?.some(a => a.type === '3d_model') && (
+            <span className="ml-2 bg-gold/20 border border-gold/40 text-gold text-xs px-2 py-0.5 font-mono tracking-wider rounded-sm">
+              3D Model Available ↗
+            </span>
+          )}
         </motion.div>
 
-        {/* Title */}
         <motion.h1
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
@@ -73,7 +71,6 @@ export default function PropertyHero({ project }: { project: Project }) {
           )}
         </motion.h1>
 
-        {/* Tagline */}
         {project.tagline && (
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -85,12 +82,11 @@ export default function PropertyHero({ project }: { project: Project }) {
           </motion.p>
         )}
 
-        {/* Stats bar */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7, duration: 0.6 }}
-          className="flex items-center gap-8"
+          className="flex items-center gap-4 flex-wrap"
         >
           {[
             project.price && { label: 'Starting From', value: project.price },
@@ -105,14 +101,12 @@ export default function PropertyHero({ project }: { project: Project }) {
               </div>
             )
           })}
-          
           <a href="#enquire" className="ml-auto btn-gold text-xs">
             Register Interest
           </a>
         </motion.div>
       </motion.div>
 
-      {/* Scroll hint */}
       <motion.div
         animate={{ y: [0, 8, 0] }}
         transition={{ repeat: Infinity, duration: 2 }}

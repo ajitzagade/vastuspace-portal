@@ -21,6 +21,14 @@ export interface Amenities {
   location: AmenityItem[]
 }
 
+export interface Testimonial {
+  id: string
+  name: string
+  role: string
+  text: string
+  rating: number
+}
+
 export interface ProjectAsset {
   id: string
   project_id: string
@@ -42,9 +50,10 @@ export interface Project {
   slug: string
   name: string
   tagline?: string
-  brief?: string // Tiptap JSON string
+  brief?: string
   location?: ProjectLocation
   amenities?: Amenities
+  testimonials?: Testimonial[]
   status: ProjectStatus
   price?: string
   bedrooms?: number

@@ -1,11 +1,13 @@
 import { getProjectBySlug } from '@/lib/db'
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
+import PropertyNav from '@/components/landing/PropertyNav'
 import PropertyHero from '@/components/landing/PropertyHero'
 import PropertyGallery from '@/components/landing/PropertyGallery'
 import PropertyAmenities from '@/components/landing/PropertyAmenities'
+import PropertyLocation from '@/components/landing/PropertyLocation'
+import PropertyTestimonials from '@/components/landing/PropertyTestimonials'
 import PropertyEnquire from '@/components/landing/PropertyEnquire'
-import PropertyNav from '@/components/landing/PropertyNav'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,7 +20,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     openGraph: {
       title: `${project.name} by VastuSpace`,
       description: project.tagline,
-      images: project.assets?.find(a => a.metadata.is_hero)?.cdn_url ? [project.assets.find(a => a.metadata.is_hero)!.cdn_url] : [],
+      images: project.assets?.find(a => a.metadata.is_hero)?.cdn_url
+        ? [project.assets.find(a => a.metadata.is_hero)!.cdn_url]
+        : [],
     }
   }
 }
@@ -33,6 +37,8 @@ export default async function PropertyPage({ params }: { params: { slug: string 
       <PropertyHero project={project} />
       <PropertyGallery project={project} />
       <PropertyAmenities project={project} />
+      <PropertyLocation project={project} />
+      <PropertyTestimonials project={project} />
       <PropertyEnquire project={project} />
     </div>
   )
