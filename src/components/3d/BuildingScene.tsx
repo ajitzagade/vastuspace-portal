@@ -96,7 +96,10 @@ export default function BuildingScene({ modelUrl }: { modelUrl?: string }) {
     let cancelled = false
 
     async function checkModel() {
-      if (!modelUrl || !modelUrl.endsWith('.glb')) {
+      const normalizedUrl = modelUrl ? modelUrl.split('?')[0].split('#')[0].toLowerCase() : ''
+      const isSupported = normalizedUrl.endsWith('.glb') || normalizedUrl.endsWith('.gltf')
+
+      if (!modelUrl || !isSupported) {
         setResolvedModelUrl(null)
         return
       }

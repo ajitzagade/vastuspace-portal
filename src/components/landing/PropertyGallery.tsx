@@ -41,7 +41,16 @@ export default function PropertyGallery({ project }: { project: Project }) {
     return aName.localeCompare(bName)
   })
 
-  const selectedModel = sortedModels3D[selectedModelIndex] || sortedModels3D[0]
+  const isSupported3DUrl = (url: string) => {
+    const normalized = url.split('?')[0].split('#')[0].toLowerCase()
+    return normalized.endsWith('.glb') || normalized.endsWith('.gltf')
+  }
+
+  // Some uploads (like `.obj`) are saved as `3d_model` but BuildingScene can only render
+  // `.glb`/`.gltf`. Filter here so the modal always shows a renderable model.
+  const supportedModels3D = sortedModels3D.filter(m => isSupported3DUrl(m.cdn_url))
+
+  const selectedModel = supportedModels3D[selectedModelIndex] || supportedModels3D[0]
 
   useEffect(() => {
     setSelectedModelIndex(0)
@@ -83,9 +92,9 @@ export default function PropertyGallery({ project }: { project: Project }) {
               </button>
             </div>
 
-            {sortedModels3D.length > 1 && (
+            {supportedModels3D.length > 1 && (
               <div className="flex flex-wrap gap-2 justify-center mb-4">
-                {sortedModels3D.map((m, idx) => {
+                {supportedModels3D.map((m, idx) => {
                   const rawLabel = m.metadata.original_name ?? m.storage_path
                   const label = rawLabel.replace(/\.[^.]+$/, '')
                   const active = idx === selectedModelIndex
@@ -141,7 +150,7 @@ export default function PropertyGallery({ project }: { project: Project }) {
             </motion.h2>
           </div>
           {/* 3D Model CTA */}
-          {sortedModels3D.length > 0 && (
+          {supportedModels3D.length > 0 && (
             <motion.button
               initial={{ opacity: 0, y: 10 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
