@@ -83,23 +83,23 @@ export default function ProjectEditorPage({ params }: { params: { id: string } }
     if (!file || !project) return
     setUploading(true)
     setUploadError('')
-    // In production this would upload to Supabase Storage
-    // For local dev we create an object URL as a stand-in
+    // Create an object URL for immediate UI feedback (fallback when Supabase isn't configured).
     const objectUrl = URL.createObjectURL(file)
     try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('type', uploadType)
+      formData.append('original_name', file.name)
+      formData.append('is_hero', JSON.stringify(isHero))
+      formData.append('cdn_url', objectUrl)
+
       const res = await fetch(`/api/projects/${project.id}/assets`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: file.name.endsWith('.glb') || file.name.endsWith('.gltf') || file.name.endsWith('.obj') ? '3d_model' : 'image',
-          cdn_url: objectUrl,
-          original_name: file.name,
-          is_hero: isHero,
-        }),
+        body: formData,
       })
       const newAsset = await res.json()
       setProject(p => p ? { ...p, assets: [...(p.assets || []), newAsset] } : p)
-      setUploadSuccess(`"${file.name}" added! (Object URL — use Supabase Storage for persistence)`)
+      setUploadSuccess(`"${file.name}" added!`)
       setTimeout(() => setUploadSuccess(''), 5000)
     } catch {
       setUploadError('Upload failed.')

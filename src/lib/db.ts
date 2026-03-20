@@ -1,6 +1,7 @@
 // LOCAL DEV: In-memory store replacing Supabase
 import { Project, ProjectAsset, ProjectFormData } from '@/types'
 import { v4 as uuidv4 } from 'uuid'
+import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase/admin'
 
 const SEED_PROJECTS: Project[] = [
   {
@@ -130,16 +131,76 @@ const SEED_PROJECTS: Project[] = [
 
 let projects: Project[] = [...SEED_PROJECTS]
 
+async function fetchAssetsForProjectIds(projectIds: string[]): Promise<Record<string, ProjectAsset[]>> {
+  if (!isSupabaseConfigured()) return {}
+
+  if (projectIds.length === 0) return {}
+
+  const supabase = getSupabaseAdmin()
+
+  const { data, error } = await supabase
+    .from('project_assets')
+    .select('id, project_id, type, storage_path, cdn_url, metadata, created_at')
+    .in('project_id', projectIds)
+
+  if (error) {
+    // For demo purposes we fail open to the seeded/in-memory assets.
+    console.error('Supabase fetch assets failed:', error.message)
+    return {}
+  }
+
+  const assetsByProjectId: Record<string, ProjectAsset[]> = {}
+  for (const row of data ?? []) {
+    const asset: ProjectAsset = {
+      id: row.id,
+      project_id: row.project_id,
+      type: row.type,
+      storage_path: row.storage_path,
+      cdn_url: row.cdn_url,
+      metadata: row.metadata ?? {},
+      created_at: row.created_at,
+    }
+    assetsByProjectId[row.project_id] = [...(assetsByProjectId[row.project_id] || []), asset]
+  }
+
+  return assetsByProjectId
+}
+
+async function fetchAssetsForProjectId(projectId: string): Promise<ProjectAsset[]> {
+  const map = await fetchAssetsForProjectIds([projectId])
+  return map[projectId] || []
+}
+
 export async function getProjects(): Promise<Project[]> {
-  return [...projects]
+  const seeded = [...projects]
+  const assetsByProjectId = await fetchAssetsForProjectIds(seeded.map(p => p.id))
+
+  return seeded.map(p => ({
+    ...p,
+    assets: [...(p.assets || []), ...(assetsByProjectId[p.id] || [])],
+  }))
 }
 
 export async function getProjectBySlug(slug: string): Promise<Project | null> {
-  return projects.find(p => p.slug === slug) || null
+  const project = projects.find(p => p.slug === slug)
+  if (!project) return null
+
+  const supabaseAssets = await fetchAssetsForProjectId(project.id)
+  return {
+    ...project,
+    assets: [...(project.assets || []), ...supabaseAssets],
+  }
 }
 
 export async function getProjectById(id: string): Promise<Project | null> {
-  return projects.find(p => p.id === id) || null
+  const project = projects.find(p => p.id === id)
+  if (!project) return null
+
+  const supabaseAssets = await fetchAssetsForProjectId(project.id)
+  return {
+    ...project,
+    assets: [...(project.assets || []), ...supabaseAssets],
+  }
 }
 
 export async function createProject(data: ProjectFormData): Promise<Project> {
