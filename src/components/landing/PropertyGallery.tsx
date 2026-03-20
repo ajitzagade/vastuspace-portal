@@ -86,14 +86,19 @@ export default function PropertyGallery({ project }: { project: Project }) {
               <div>
                 <h3 className="font-display text-2xl text-ivory font-light">{project.name}</h3>
                 <p className="text-gold/60 text-xs font-mono mt-1">Interactive 3D Model — drag to rotate, scroll to zoom</p>
+                {supportedModels3D.length > 0 && (
+                  <p className="text-ivory/50 text-[11px] font-mono mt-2">
+                    Models: {supportedModels3D.length} · Selected: {selectedModel?.metadata.original_name || selectedModel?.storage_path || '—'}
+                  </p>
+                )}
               </div>
               <button onClick={() => setShow3D(false)} className="text-ivory/50 hover:text-ivory transition-colors">
                 <X size={24} />
               </button>
             </div>
 
-            {supportedModels3D.length > 1 && (
-              <div className="flex flex-wrap gap-2 justify-center mb-4">
+            {supportedModels3D.length > 0 && (
+              <div className="flex flex-wrap gap-2 justify-center mb-4 relative z-[60] px-3">
                 {supportedModels3D.map((m, idx) => {
                   const rawLabel = m.metadata.original_name ?? m.storage_path
                   const label = rawLabel.replace(/\.[^.]+$/, '')
@@ -105,8 +110,8 @@ export default function PropertyGallery({ project }: { project: Project }) {
                       type="button"
                       onClick={() => setSelectedModelIndex(idx)}
                       className={[
-                        'px-3 py-1 rounded-sm text-xs font-mono transition-colors border',
-                        active ? 'border-gold/60 bg-gold/15 text-gold' : 'border-gold/20 bg-transparent text-ivory/60 hover:border-gold/40 hover:text-ivory',
+                        'px-3 py-1 rounded-sm text-xs font-mono transition-colors border backdrop-blur',
+                        active ? 'border-gold/70 bg-gold/20 text-gold' : 'border-gold/20 bg-obsidian/40 text-ivory/60 hover:border-gold/50 hover:text-ivory',
                       ].join(' ')}
                     >
                       {label}

@@ -88,7 +88,11 @@ export default function ProjectEditorPage({ params }: { params: { id: string } }
     try {
       const formData = new FormData()
       formData.append('file', file)
-      formData.append('type', uploadType)
+      // Infer asset type from extension so uploads are consistent even if the UI toggle is wrong.
+      const nameLower = file.name.toLowerCase()
+      const inferredType =
+        nameLower.endsWith('.glb') || nameLower.endsWith('.gltf') || nameLower.endsWith('.obj') ? '3d_model' : 'image'
+      formData.append('type', inferredType)
       formData.append('original_name', file.name)
       formData.append('is_hero', JSON.stringify(isHero))
       formData.append('cdn_url', objectUrl)
