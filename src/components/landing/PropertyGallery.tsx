@@ -15,8 +15,15 @@ export default function PropertyGallery({ project }: { project: Project }) {
   const [show3D, setShow3D] = useState(false)
   const [selectedModelIndex, setSelectedModelIndex] = useState(0)
 
-  const images = project.assets?.filter(a => a.type === 'image') || []
-  const models3D = project.assets?.filter(a => a.type === '3d_model') || []
+  const isSupported3DUrl = (url: string) => {
+    const normalized = url.split('?')[0].split('#')[0].toLowerCase()
+    return normalized.endsWith('.glb') || normalized.endsWith('.gltf')
+  }
+
+  // Some older uploads may have been stored with the wrong `type`.
+  // For 3D rendering we rely on file extension so the CTA/chips appear correctly.
+  const images = project.assets?.filter(a => a.type === 'image' && !isSupported3DUrl(a.cdn_url)) || []
+  const models3D = project.assets?.filter(a => isSupported3DUrl(a.cdn_url)) || []
 
   // Ensure new uploads show up immediately in the main grid.
   // Supabase assets are appended after seeded assets, so without sorting the grid may stay unchanged.
@@ -40,11 +47,6 @@ export default function PropertyGallery({ project }: { project: Project }) {
     const bName = b.metadata.original_name ?? b.storage_path
     return aName.localeCompare(bName)
   })
-
-  const isSupported3DUrl = (url: string) => {
-    const normalized = url.split('?')[0].split('#')[0].toLowerCase()
-    return normalized.endsWith('.glb') || normalized.endsWith('.gltf')
-  }
 
   // Some uploads (like `.obj`) are saved as `3d_model` but BuildingScene can only render
   // `.glb`/`.gltf`. Filter here so the modal always shows a renderable model.
