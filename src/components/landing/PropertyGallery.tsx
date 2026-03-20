@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { Box, X, ZoomIn } from 'lucide-react'
 import { Project } from '@/types'
@@ -13,9 +13,31 @@ export default function PropertyGallery({ project }: { project: Project }) {
   const inView = useInView(ref, { once: true, margin: '-100px' })
   const [lightbox, setLightbox] = useState<string | null>(null)
   const [show3D, setShow3D] = useState(false)
+  const [selectedModelIndex, setSelectedModelIndex] = useState(0)
 
   const images = project.assets?.filter(a => a.type === 'image') || []
-  const model3D = project.assets?.find(a => a.type === '3d_model')
+  const models3D = project.assets?.filter(a => a.type === '3d_model') || []
+
+  const sortedModels3D = [...models3D].sort((a, b) => {
+    const aHero = a.metadata.is_hero ? 1 : 0
+    const bHero = b.metadata.is_hero ? 1 : 0
+    if (aHero !== bHero) return bHero - aHero // hero first
+
+    const aOrder = a.metadata.order ?? 0
+    const bOrder = b.metadata.order ?? 0
+    if (aOrder !== bOrder) return aOrder - bOrder
+
+    const aName = a.metadata.original_name ?? a.storage_path
+    const bName = b.metadata.original_name ?? b.storage_path
+    return aName.localeCompare(bName)
+  })
+
+  const selectedModel = sortedModels3D[selectedModelIndex] || sortedModels3D[0]
+
+  useEffect(() => {
+    setSelectedModelIndex(0)
+  }, [project.id])
+
   const nonHero = images.filter(a => !a.metadata.is_hero)
 
   // Use real assets if available, fallback images otherwise
@@ -41,7 +63,7 @@ export default function PropertyGallery({ project }: { project: Project }) {
       )}
 
       {/* 3D Viewer Modal */}
-      {show3D && model3D && (
+      {show3D && selectedModel && (
         <div className="fixed inset-0 z-50 bg-obsidian/95 flex flex-col items-center justify-center p-8">
           <div className="w-full max-w-4xl">
             <div className="flex items-center justify-between mb-4">
@@ -53,11 +75,36 @@ export default function PropertyGallery({ project }: { project: Project }) {
                 <X size={24} />
               </button>
             </div>
+
+            {sortedModels3D.length > 1 && (
+              <div className="flex flex-wrap gap-2 justify-center mb-4">
+                {sortedModels3D.map((m, idx) => {
+                  const rawLabel = m.metadata.original_name ?? m.storage_path
+                  const label = rawLabel.replace(/\.[^.]+$/, '')
+                  const active = idx === selectedModelIndex
+
+                  return (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => setSelectedModelIndex(idx)}
+                      className={[
+                        'px-3 py-1 rounded-sm text-xs font-mono transition-colors border',
+                        active ? 'border-gold/60 bg-gold/15 text-gold' : 'border-gold/20 bg-transparent text-ivory/60 hover:border-gold/40 hover:text-ivory',
+                      ].join(' ')}
+                    >
+                      {label}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+
             <div className="w-full h-[60vh] rounded-sm overflow-hidden border border-gold/20 bg-obsidian-800">
-              <Scene3D modelUrl={model3D.cdn_url} />
+              <Scene3D modelUrl={selectedModel.cdn_url} />
             </div>
             <p className="text-ivory/20 text-xs font-mono text-center mt-3">
-              {model3D.metadata.original_name || 'model.glb'} · Full screen 3D experience
+              {selectedModel.metadata.original_name || 'model.glb'} · Full screen 3D experience
             </p>
           </div>
         </div>
@@ -87,7 +134,7 @@ export default function PropertyGallery({ project }: { project: Project }) {
             </motion.h2>
           </div>
           {/* 3D Model CTA */}
-          {model3D && (
+          {sortedModels3D.length > 0 && (
             <motion.button
               initial={{ opacity: 0, y: 10 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}

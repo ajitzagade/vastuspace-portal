@@ -6,7 +6,5 @@ const nextConfig = {
       { protocol: 'https', hostname: 'images.unsplash.com' },
     ],
   },
-  // Allow cross-origin for local subdomain simulation
-  allowedDevOrigins: ['*.localhost'],
 }
 module.exports = nextConfig

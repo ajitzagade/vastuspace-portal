@@ -9,13 +9,15 @@ export default function PropertyNav({ project }: { project: Project }) {
   const { scrollY } = useScroll()
   const bg = useTransform(scrollY, [0, 80], ['rgba(13,13,13,0)', 'rgba(13,13,13,0.95)'])
   const borderOpacity = useTransform(scrollY, [0, 80], [0, 0.15])
+  // Framer Motion expects a CSS color string for `borderBottomColor`, not a raw number.
+  const borderColor = useTransform(borderOpacity, (opacity) => `rgba(212, 181, 99, ${opacity})`)
 
   return (
     <motion.nav
       style={{ backgroundColor: bg }}
       className="fixed top-0 left-0 right-0 z-50 px-8 py-5 flex items-center justify-between backdrop-blur-sm"
     >
-      <motion.div style={{ borderBottomColor: borderOpacity.get() }}
+      <motion.div style={{ borderBottomColor: borderColor }}
         className="absolute bottom-0 left-0 right-0 h-px border-b border-gold/0" />
 
       <Link href="/" className="flex items-center gap-3 text-ivory/50 hover:text-ivory transition-colors">

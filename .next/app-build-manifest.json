@@ -1,40 +1,77 @@
 {
   "pages": {
-    "/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/page.js"
+    "/_not-found/page": [
+      "static/chunks/webpack-e2755dbfe8d81e7c.js",
+      "static/chunks/fd9d1056-eb01b2bb73bb537e.js",
+      "static/chunks/23-2cb916c89d830692.js",
+      "static/chunks/main-app-e592b590e35b23c1.js",
+      "static/chunks/app/_not-found/page-6727a1a7f4cddda9.js"
     ],
     "/layout": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/layout.css",
-      "static/chunks/app/layout.js"
+      "static/chunks/webpack-e2755dbfe8d81e7c.js",
+      "static/chunks/fd9d1056-eb01b2bb73bb537e.js",
+      "static/chunks/23-2cb916c89d830692.js",
+      "static/chunks/main-app-e592b590e35b23c1.js",
+      "static/css/028651f67b13bfc0.css",
+      "static/chunks/app/layout-37b86340675104de.js"
     ],
     "/projects/[slug]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/projects/[slug]/page.js"
+      "static/chunks/webpack-e2755dbfe8d81e7c.js",
+      "static/chunks/fd9d1056-eb01b2bb73bb537e.js",
+      "static/chunks/23-2cb916c89d830692.js",
+      "static/chunks/main-app-e592b590e35b23c1.js",
+      "static/chunks/231-c307204e683c2b19.js",
+      "static/chunks/428-623936da76580a58.js",
+      "static/chunks/396-04a3f5faa582322d.js",
+      "static/chunks/app/projects/[slug]/page-30ee1f46219199d8.js"
     ],
-    "/dashboard/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/page.js"
+    "/projects/page": [
+      "static/chunks/webpack-e2755dbfe8d81e7c.js",
+      "static/chunks/fd9d1056-eb01b2bb73bb537e.js",
+      "static/chunks/23-2cb916c89d830692.js",
+      "static/chunks/main-app-e592b590e35b23c1.js",
+      "static/chunks/231-c307204e683c2b19.js",
+      "static/chunks/app/projects/page-c825571733058cce.js"
     ],
-    "/dashboard/layout": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/layout.js"
+    "/page": [
+      "static/chunks/webpack-e2755dbfe8d81e7c.js",
+      "static/chunks/fd9d1056-eb01b2bb73bb537e.js",
+      "static/chunks/23-2cb916c89d830692.js",
+      "static/chunks/main-app-e592b590e35b23c1.js",
+      "static/chunks/231-c307204e683c2b19.js",
+      "static/chunks/app/page-01835a5291d3b692.js"
     ],
     "/dashboard/[id]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/[id]/page.js"
+      "static/chunks/webpack-e2755dbfe8d81e7c.js",
+      "static/chunks/fd9d1056-eb01b2bb73bb537e.js",
+      "static/chunks/23-2cb916c89d830692.js",
+      "static/chunks/main-app-e592b590e35b23c1.js",
+      "static/chunks/231-c307204e683c2b19.js",
+      "static/chunks/app/dashboard/[id]/page-bb15d6c0d94745b6.js"
+    ],
+    "/dashboard/layout": [
+      "static/chunks/webpack-e2755dbfe8d81e7c.js",
+      "static/chunks/fd9d1056-eb01b2bb73bb537e.js",
+      "static/chunks/23-2cb916c89d830692.js",
+      "static/chunks/main-app-e592b590e35b23c1.js",
+      "static/chunks/231-c307204e683c2b19.js",
+      "static/chunks/app/dashboard/layout-17bf0ab82579e421.js"
     ],
     "/dashboard/new/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/new/page.js"
+      "static/chunks/webpack-e2755dbfe8d81e7c.js",
+      "static/chunks/fd9d1056-eb01b2bb73bb537e.js",
+      "static/chunks/23-2cb916c89d830692.js",
+      "static/chunks/main-app-e592b590e35b23c1.js",
+      "static/chunks/428-623936da76580a58.js",
+      "static/chunks/app/dashboard/new/page-64ff2d443a85a0c2.js"
+    ],
+    "/dashboard/page": [
+      "static/chunks/webpack-e2755dbfe8d81e7c.js",
+      "static/chunks/fd9d1056-eb01b2bb73bb537e.js",
+      "static/chunks/23-2cb916c89d830692.js",
+      "static/chunks/main-app-e592b590e35b23c1.js",
+      "static/chunks/231-c307204e683c2b19.js",
+      "static/chunks/app/dashboard/page-57bc2bf1455426f0.js"
     ]
   }
 }
