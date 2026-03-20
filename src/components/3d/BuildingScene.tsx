@@ -90,7 +90,11 @@ function Particles() {
 
 export default function BuildingScene({ modelUrl }: { modelUrl?: string }) {
   const [hovered, setHovered] = useState(false)
-  const [resolvedModelUrl, setResolvedModelUrl] = useState<string | null>(null)
+  const [resolvedModelUrl, setResolvedModelUrl] = useState<string | null>(() => {
+    const normalizedUrl = modelUrl ? modelUrl.split('?')[0].split('#')[0].toLowerCase() : ''
+    const isSupported = normalizedUrl.endsWith('.glb') || normalizedUrl.endsWith('.gltf')
+    return modelUrl && isSupported ? modelUrl : null
+  })
 
   useEffect(() => {
     // Demo mode: if the URL looks like a supported GLB/GLTF, try to render it immediately.
@@ -122,7 +126,8 @@ export default function BuildingScene({ modelUrl }: { modelUrl?: string }) {
 
         {resolvedModelUrl ? (
           <Float speed={1.2} rotationIntensity={0.05} floatIntensity={0.2}>
-            <GLTFModel url={resolvedModelUrl} />
+            {/* Key forces remount when URL changes, avoiding stale GLTF cache */}
+            <GLTFModel key={resolvedModelUrl} url={resolvedModelUrl} />
           </Float>
         ) : (
           <Float speed={1.2} rotationIntensity={0.08} floatIntensity={0.3}>
