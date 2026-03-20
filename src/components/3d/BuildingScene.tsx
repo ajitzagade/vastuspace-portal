@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, Suspense } from 'react'
+import { useEffect, useRef, useState, Suspense } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls, Environment, Float, Sphere, useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
@@ -90,6 +90,57 @@ function Particles() {
 
 export default function BuildingScene({ modelUrl }: { modelUrl?: string }) {
   const [hovered, setHovered] = useState(false)
+  const [resolvedModelUrl, setResolvedModelUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function checkModel() {
+      if (!modelUrl || !modelUrl.endsWith('.glb')) {
+        setResolvedModelUrl(null)
+        return
+      }
+
+      // Only run the "does this exist?" check for local URLs served by Next.
+      // For remote URLs, `HEAD` might be blocked even though `GET` would work.
+      if (!modelUrl.startsWith('/')) {
+        setResolvedModelUrl(modelUrl)
+        return
+      }
+
+      try {
+        // Avoid noisy console errors when the GLB isn't present in `public/models`.
+        const headRes = await fetch(modelUrl, { method: 'HEAD', cache: 'no-store' })
+
+        if (headRes.ok) {
+          if (!cancelled) setResolvedModelUrl(modelUrl)
+          return
+        }
+
+        // Some hosts may block HEAD; fall back to a tiny ranged GET.
+        if (headRes.status === 405 || headRes.status === 403) {
+          const getRes = await fetch(modelUrl, {
+            method: 'GET',
+            headers: { Range: 'bytes=0-1023' },
+            cache: 'no-store',
+          })
+
+          const ok = getRes.ok || getRes.status === 206
+          if (!cancelled) setResolvedModelUrl(ok ? modelUrl : null)
+          return
+        }
+
+        if (!cancelled) setResolvedModelUrl(null)
+      } catch {
+        if (!cancelled) setResolvedModelUrl(null)
+      }
+    }
+
+    checkModel()
+    return () => {
+      cancelled = true
+    }
+  }, [modelUrl])
 
   return (
     <Canvas
@@ -105,9 +156,9 @@ export default function BuildingScene({ modelUrl }: { modelUrl?: string }) {
         <pointLight position={[-4, 6, -4]} intensity={0.5} color="#c9a84c" />
         <pointLight position={[4, 2, 4]} intensity={0.3} color="#4488ff" />
 
-        {modelUrl && modelUrl.endsWith('.glb') ? (
+        {resolvedModelUrl ? (
           <Float speed={1.2} rotationIntensity={0.05} floatIntensity={0.2}>
-            <GLTFModel url={modelUrl} />
+            <GLTFModel url={resolvedModelUrl} />
           </Float>
         ) : (
           <Float speed={1.2} rotationIntensity={0.08} floatIntensity={0.3}>
