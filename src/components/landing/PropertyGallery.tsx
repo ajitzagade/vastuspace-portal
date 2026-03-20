@@ -18,6 +18,15 @@ export default function PropertyGallery({ project }: { project: Project }) {
   const images = project.assets?.filter(a => a.type === 'image') || []
   const models3D = project.assets?.filter(a => a.type === '3d_model') || []
 
+  // Ensure new uploads show up immediately in the main grid.
+  // Supabase assets are appended after seeded assets, so without sorting the grid may stay unchanged.
+  const sortedImages = [...images].sort((a, b) => {
+    const at = a.created_at ? new Date(a.created_at).getTime() : 0
+    const bt = b.created_at ? new Date(b.created_at).getTime() : 0
+    return bt - at
+  })
+  const nonHero = sortedImages.filter(a => !a.metadata.is_hero)
+
   const sortedModels3D = [...models3D].sort((a, b) => {
     const aHero = a.metadata.is_hero ? 1 : 0
     const bHero = b.metadata.is_hero ? 1 : 0
@@ -37,8 +46,6 @@ export default function PropertyGallery({ project }: { project: Project }) {
   useEffect(() => {
     setSelectedModelIndex(0)
   }, [project.id])
-
-  const nonHero = images.filter(a => !a.metadata.is_hero)
 
   // Use real assets if available, fallback images otherwise
   const displayImages = nonHero.length > 0 ? nonHero : [
@@ -234,7 +241,7 @@ export default function PropertyGallery({ project }: { project: Project }) {
             transition={{ delay: 0.5 }}
             className="mt-16 flex gap-3 overflow-x-auto pb-2"
           >
-            {images.map(img => (
+            {sortedImages.map(img => (
               <div key={img.id}
                 className="w-32 h-24 flex-shrink-0 rounded-sm overflow-hidden cursor-pointer group border border-gold/10 hover:border-gold/30 transition-colors"
                 onClick={() => setLightbox(img.cdn_url)}
