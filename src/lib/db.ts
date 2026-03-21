@@ -50,6 +50,9 @@ const SEED_PROJECTS: Project[] = [
       { id: 'a5', project_id: '1', type: '3d_model', storage_path: 'projects/marble-heights/sample-tower.glb', cdn_url: '/models/sample-tower.glb', metadata: { is_hero: false, order: 1, original_name: 'sample-tower.glb' }, created_at: new Date().toISOString() },
       { id: 'a6', project_id: '1', type: '3d_model', storage_path: 'projects/marble-heights/sample-villa.glb', cdn_url: '/models/sample-villa.glb', metadata: { is_hero: false, order: 2, original_name: 'sample-villa.glb' }, created_at: new Date().toISOString() },
       { id: 'a7', project_id: '1', type: '3d_model', storage_path: 'projects/marble-heights/sample-pavilion.glb', cdn_url: '/models/sample-pavilion.glb', metadata: { is_hero: false, order: 3, original_name: 'sample-pavilion.glb' }, created_at: new Date().toISOString() },
+      { id: 'fp-m1', project_id: '1', type: 'floor_plan', storage_path: 'projects/marble-heights/plan-level-42.jpg', cdn_url: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=1600&q=80', metadata: { is_hero: false, order: 0, original_name: 'level-42-layout.jpg' }, created_at: new Date().toISOString() },
+      { id: 'fp-m2', project_id: '1', type: 'floor_plan', storage_path: 'projects/marble-heights/plan-penthouse.jpg', cdn_url: 'https://images.unsplash.com/photo-1503389152951-9f343605f61e?w=1600&q=80', metadata: { is_hero: false, order: 1, original_name: 'penthouse-plan.jpg' }, created_at: new Date().toISOString() },
+      { id: 'fp-m3', project_id: '1', type: 'floor_plan', storage_path: 'projects/marble-heights/plan-amenity.jpg', cdn_url: 'https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=1600&q=80', metadata: { is_hero: false, order: 2, original_name: 'amenity-level-plan.jpg' }, created_at: new Date().toISOString() },
     ]
   },
   {
@@ -94,6 +97,8 @@ const SEED_PROJECTS: Project[] = [
       { id: 'b4', project_id: '2', type: '3d_model', storage_path: 'projects/ocean-vista/sample-tower.glb', cdn_url: '/models/sample-tower.glb', metadata: { is_hero: false, order: 1, original_name: 'sample-tower.glb' }, created_at: new Date().toISOString() },
       { id: 'b5', project_id: '2', type: '3d_model', storage_path: 'projects/ocean-vista/sample-villa.glb', cdn_url: '/models/sample-villa.glb', metadata: { is_hero: false, order: 2, original_name: 'sample-villa.glb' }, created_at: new Date().toISOString() },
       { id: 'b6', project_id: '2', type: '3d_model', storage_path: 'projects/ocean-vista/sample-pavilion.glb', cdn_url: '/models/sample-pavilion.glb', metadata: { is_hero: false, order: 3, original_name: 'sample-pavilion.glb' }, created_at: new Date().toISOString() },
+      { id: 'fp-o1', project_id: '2', type: 'floor_plan', storage_path: 'projects/ocean-vista/plan-cliff-villa.jpg', cdn_url: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1600&q=80', metadata: { is_hero: false, order: 0, original_name: 'cliff-villa-layout.jpg' }, created_at: new Date().toISOString() },
+      { id: 'fp-o2', project_id: '2', type: 'floor_plan', storage_path: 'projects/ocean-vista/plan-guest-wing.jpg', cdn_url: 'https://images.unsplash.com/photo-1618216820394-72992ba9c055?w=1600&q=80', metadata: { is_hero: false, order: 1, original_name: 'guest-wing-plan.jpg' }, created_at: new Date().toISOString() },
     ]
   },
   {
@@ -136,6 +141,8 @@ const SEED_PROJECTS: Project[] = [
       { id: 'c3', project_id: '3', type: '3d_model', storage_path: 'projects/verdant-manor/sample-tower.glb', cdn_url: '/models/sample-tower.glb', metadata: { is_hero: false, order: 1, original_name: 'sample-tower.glb' }, created_at: new Date().toISOString() },
       { id: 'c4', project_id: '3', type: '3d_model', storage_path: 'projects/verdant-manor/sample-villa.glb', cdn_url: '/models/sample-villa.glb', metadata: { is_hero: false, order: 2, original_name: 'sample-villa.glb' }, created_at: new Date().toISOString() },
       { id: 'c5', project_id: '3', type: '3d_model', storage_path: 'projects/verdant-manor/sample-pavilion.glb', cdn_url: '/models/sample-pavilion.glb', metadata: { is_hero: false, order: 3, original_name: 'sample-pavilion.glb' }, created_at: new Date().toISOString() },
+      { id: 'fp-v1', project_id: '3', type: 'floor_plan', storage_path: 'projects/verdant-manor/plan-garden-villa.jpg', cdn_url: 'https://images.unsplash.com/photo-1600607687644-c7171b42498f?w=1600&q=80', metadata: { is_hero: false, order: 0, original_name: 'garden-villa-plan.jpg' }, created_at: new Date().toISOString() },
+      { id: 'fp-v2', project_id: '3', type: 'floor_plan', storage_path: 'projects/verdant-manor/plan-terrace.jpg', cdn_url: 'https://images.unsplash.com/photo-1600566753089-00f18fb6b3ea?w=1600&q=80', metadata: { is_hero: false, order: 1, original_name: 'terrace-level-plan.jpg' }, created_at: new Date().toISOString() },
     ]
   }
 ]

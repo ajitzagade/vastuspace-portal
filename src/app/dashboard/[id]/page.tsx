@@ -94,7 +94,9 @@ export default function ProjectEditorPage({ params }: { params: { id: string } }
       setProject(p => p ? { ...p, assets: [...(p.assets || []), newAsset] } : p)
       setUrlInput('')
       setIsHero(false)
-      setUploadSuccess(`${uploadType === '3d_model' ? '3D model' : 'Asset'} added successfully!`)
+      setUploadSuccess(
+        uploadType === '3d_model' ? '3D model added successfully!' : uploadType === 'floor_plan' ? 'Floor plan added successfully!' : 'Asset added successfully!',
+      )
       setTimeout(() => setUploadSuccess(''), 3000)
     } catch {
       setUploadError('Failed to add asset. Check the URL and try again.')
@@ -113,10 +115,13 @@ export default function ProjectEditorPage({ params }: { params: { id: string } }
     try {
       const formData = new FormData()
       formData.append('file', file)
-      // Infer asset type from extension so uploads are consistent even if the UI toggle is wrong.
       const nameLower = file.name.toLowerCase()
       const inferredType =
-        nameLower.endsWith('.glb') || nameLower.endsWith('.gltf') || nameLower.endsWith('.obj') ? '3d_model' : 'image'
+        uploadType === 'floor_plan'
+          ? 'floor_plan'
+          : nameLower.endsWith('.glb') || nameLower.endsWith('.gltf') || nameLower.endsWith('.obj')
+            ? '3d_model'
+            : 'image'
       formData.append('type', inferredType)
       formData.append('original_name', file.name)
       formData.append('is_hero', JSON.stringify(isHero))
@@ -250,10 +255,16 @@ export default function ProjectEditorPage({ params }: { params: { id: string } }
                 className="w-full border border-dashed border-gold/30 rounded-sm py-6 text-xs text-ivory/40 hover:border-gold/60 hover:text-ivory/70 transition-colors flex flex-col items-center gap-2">
                 <Upload size={20} className="text-gold/50" />
                 <span>
-                  {uploadType === '3d_model' ? 'Click to upload .glb / .gltf / .obj' : 'Click to upload image'}
+                  {uploadType === '3d_model'
+                    ? 'Click to upload .glb / .gltf / .obj'
+                    : uploadType === 'floor_plan'
+                      ? 'Click to upload floor plan image'
+                      : 'Click to upload image'}
                 </span>
                 <span className="text-ivory/20">
-                  {uploadType === '3d_model' ? 'GLB, GLTF, OBJ supported' : 'JPG, PNG, WEBP supported'}
+                  {uploadType === '3d_model'
+                    ? 'GLB, GLTF, OBJ supported'
+                    : 'JPG, PNG, WEBP, PDF (as image) supported'}
                 </span>
               </button>
               <input ref={fileInputRef} type="file"
@@ -368,20 +379,20 @@ export default function ProjectEditorPage({ params }: { params: { id: string } }
           </div>
 
           {/* Floor Plans */}
-          {floorPlans.length > 0 && (
-            <div className="glass rounded-lg border border-gold/10 p-4">
-              <h2 className="text-xs text-ivory/40 tracking-widest uppercase mb-3 font-body">Floor Plans ({floorPlans.length})</h2>
+          <div className="glass rounded-lg border border-gold/10 p-4">
+            <h2 className="text-xs text-ivory/40 tracking-widest uppercase mb-3 font-body">Floor Plans ({floorPlans.length})</h2>
+            {floorPlans.length > 0 ? (
               <div className="space-y-2">
                 {floorPlans.map(asset => (
                   <div key={asset.id} className="flex items-center gap-3">
                     <div className="w-14 h-10 rounded overflow-hidden flex-shrink-0 bg-obsidian-700">
                       <img src={asset.cdn_url} alt="" className="w-full h-full object-cover" />
                     </div>
-                    <p className="text-ivory/60 text-xs truncate font-mono">{asset.metadata.original_name || 'floor-plan'}</p>
+                    <p className="text-ivory/60 text-xs truncate font-mono flex-1 min-w-0">{asset.metadata.original_name || 'floor-plan'}</p>
                     <button
                       type="button"
                       onClick={() => handleDeleteAsset(asset.id)}
-                      className="ml-auto text-ivory/30 hover:text-red-300 transition-colors"
+                      className="text-ivory/30 hover:text-red-300 transition-colors flex-shrink-0"
                       aria-label="Delete asset"
                       title="Delete asset"
                     >
@@ -390,8 +401,10 @@ export default function ProjectEditorPage({ params }: { params: { id: string } }
                   </div>
                 ))}
               </div>
-            </div>
-          )}
+            ) : (
+              <p className="text-ivory/20 text-xs text-center py-4">Select 📐 Plan and upload — shown only on the public Plans section</p>
+            )}
+          </div>
 
           {/* Subdomain link */}
           <div className="glass rounded-lg border border-gold/10 p-4">

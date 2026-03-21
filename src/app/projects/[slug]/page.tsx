@@ -4,6 +4,7 @@ import { Metadata } from 'next'
 import PropertyNav from '@/components/landing/PropertyNav'
 import PropertyHero from '@/components/landing/PropertyHero'
 import PropertyGallery from '@/components/landing/PropertyGallery'
+import PropertyFloorPlans from '@/components/landing/PropertyFloorPlans'
 import PropertyAmenities from '@/components/landing/PropertyAmenities'
 import PropertyLocation from '@/components/landing/PropertyLocation'
 import PropertyTestimonials from '@/components/landing/PropertyTestimonials'
@@ -36,6 +37,7 @@ export default async function PropertyPage({ params }: { params: { slug: string 
       <PropertyNav project={project} />
       <PropertyHero project={project} />
       <PropertyGallery project={project} />
+      <PropertyFloorPlans project={project} />
       <PropertyAmenities project={project} />
       <PropertyLocation project={project} />
       <PropertyTestimonials project={project} />
