@@ -1,5 +1,5 @@
-// LOCAL DEV: In-memory store replacing Supabase
-import { Project, ProjectAsset, ProjectFormData } from '@/types'
+// LOCAL DEV: In-memory store; optional Supabase `project_overrides` for durable edits (see supabase/project_overrides.sql)
+import { Project, ProjectAsset, ProjectFormData, ProjectLocation } from '@/types'
 import { getProjectSubdomainUrl } from '@/lib/site-url'
 import { v4 as uuidv4 } from 'uuid'
 import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase/admin'
@@ -150,6 +150,83 @@ const SEED_PROJECTS: Project[] = [
 
 let projects: Project[] = [...SEED_PROJECTS]
 
+function defaultEmptyLocation(): ProjectLocation {
+  return { lat: 0, lng: 0, address: '', city: '', country: '' }
+}
+
+/** Coerce JSON/string lat-lng and always return a full ProjectLocation. */
+export function normalizeLocation(
+  loc: Partial<ProjectLocation> & Record<string, unknown>,
+): ProjectLocation {
+  const lat = loc.lat
+  const lng = loc.lng
+  return {
+    address: String(loc.address ?? ''),
+    city: String(loc.city ?? ''),
+    country: String(loc.country ?? ''),
+    lat: typeof lat === 'number' && Number.isFinite(lat) ? lat : Number.parseFloat(String(lat ?? 0)) || 0,
+    lng: typeof lng === 'number' && Number.isFinite(lng) ? lng : Number.parseFloat(String(lng ?? 0)) || 0,
+  }
+}
+
+function mergeStoredProject(base: Project, patch: Partial<Project>): Project {
+  const next: Project = {
+    ...base,
+    ...patch,
+    assets: base.assets,
+  }
+  if (patch.location !== undefined) {
+    next.location = normalizeLocation({
+      ...(base.location || defaultEmptyLocation()),
+      ...(patch.location as ProjectLocation),
+    })
+  }
+  return next
+}
+
+/**
+ * Apply `project_overrides` rows onto the in-memory project list.
+ * Runs on every read (not once per process): if the first request saw an empty table and later
+ * rows were saved, a one-shot hydrate would never pick them up — that caused stale UI.
+ */
+async function hydrateProjectOverridesFromSupabase(): Promise<void> {
+  if (!isSupabaseConfigured()) return
+
+  const supabase = getSupabaseAdmin()
+  const { data, error } = await supabase.from('project_overrides').select('project_id, payload')
+
+  if (error) {
+    console.warn('[db] project_overrides hydrate skipped:', error.message)
+    return
+  }
+
+  for (const row of data ?? []) {
+    const pid = String((row as { project_id: string }).project_id)
+    const idx = projects.findIndex(p => p.id === pid)
+    if (idx === -1) continue
+    projects[idx] = mergeStoredProject(projects[idx], (row.payload ?? {}) as Partial<Project>)
+  }
+}
+
+async function persistProjectOverride(project: Project): Promise<void> {
+  if (!isSupabaseConfigured()) return
+
+  const { assets: _a, ...rest } = project
+  const supabase = getSupabaseAdmin()
+  const { error } = await supabase.from('project_overrides').upsert(
+    {
+      project_id: project.id,
+      payload: rest,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: 'project_id' },
+  )
+
+  if (error) {
+    console.error('[db] project_overrides upsert failed:', error.message)
+  }
+}
+
 async function fetchAssetsForProjectIds(projectIds: string[]): Promise<Record<string, ProjectAsset[]>> {
   if (!isSupabaseConfigured()) return {}
 
@@ -191,6 +268,7 @@ async function fetchAssetsForProjectId(projectId: string): Promise<ProjectAsset[
 }
 
 export async function getProjects(): Promise<Project[]> {
+  await hydrateProjectOverridesFromSupabase()
   const seeded = [...projects]
   const assetsByProjectId = await fetchAssetsForProjectIds(seeded.map(p => p.id))
 
@@ -201,6 +279,7 @@ export async function getProjects(): Promise<Project[]> {
 }
 
 export async function getProjectBySlug(slug: string): Promise<Project | null> {
+  await hydrateProjectOverridesFromSupabase()
   const project = projects.find(p => p.slug === slug)
   if (!project) return null
 
@@ -212,6 +291,7 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
 }
 
 export async function getProjectById(id: string): Promise<Project | null> {
+  await hydrateProjectOverridesFromSupabase()
   const project = projects.find(p => p.id === id)
   if (!project) return null
 
@@ -299,10 +379,10 @@ export async function updateProject(
   if (data.area_sqft !== undefined) next.area_sqft = parseOptionalInt(data.area_sqft, cur.area_sqft)
 
   if (data.location !== undefined) {
-    next.location = {
-      ...(cur.location || { lat: 0, lng: 0, address: '', city: '', country: '' }),
-      ...data.location,
-    }
+    next.location = normalizeLocation({
+      ...(cur.location || defaultEmptyLocation()),
+      ...(data.location as ProjectLocation),
+    })
   }
 
   if (data.amenities !== undefined) {
@@ -310,10 +390,16 @@ export async function updateProject(
   }
 
   projects[idx] = next
+  await persistProjectOverride(next)
   return next
 }
 
 export async function deleteProject(id: string): Promise<boolean> {
+  if (isSupabaseConfigured()) {
+    const supabase = getSupabaseAdmin()
+    const { error } = await supabase.from('project_overrides').delete().eq('project_id', id)
+    if (error) console.warn('[db] project_overrides delete:', error.message)
+  }
   const before = projects.length
   projects = projects.filter(p => p.id !== id)
   return projects.length < before

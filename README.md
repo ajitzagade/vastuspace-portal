@@ -33,18 +33,35 @@ No database needed — everything uses seeded in-memory data.
 2. Add URL + anon key to `.env.local`
 3. Replace functions in `src/lib/db.ts` with Supabase client calls
 
-## 🌐 Production subdomains (e.g. `marble-heights.vastuspace-portal.vercel.app`)
+## 🌐 Production URLs (Vercel)
 
-1. In **Vercel → Project → Domains**, add a **wildcard** host: `*.vastuspace-portal.vercel.app` (or your custom apex).
-2. Set env (Production + Preview):
+> **Vercel policy:** **Wildcard subdomains are not supported for `.vercel.app` domains.**  
+> You only get the deployment host (e.g. `your-project.vercel.app`). Per-project hosts like `slug.your-project.vercel.app` are not available via wildcard DNS on `vercel.app`. Use **path URLs** below, or buy a **custom domain** for `*.yourdomain.com`.
 
-   - `ROOT_DOMAIN` = `vastuspace-portal.vercel.app` (no `https://`)
-   - `NEXT_PUBLIC_ROOT_DOMAIN` = same (used for links in the UI)
-   - `NEXT_PUBLIC_SITE_URL` = `https://vastuspace-portal.vercel.app` (apex URL for redirects from subdomains)
+### Default: path-based (no DNS setup)
 
-3. Middleware (`middleware.ts`) rewrites `https://{slug}.{ROOT_DOMAIN}/` → `/projects/{slug}`. Other paths on a project host redirect to the apex (e.g. `/dashboard`).
+You **cannot** attach `*.your-project.vercel.app` in Domains — the platform owns that zone. Use the single deployment URL + path instead.
 
-**Note:** Project edits are stored in **in-memory** data on the server. On Vercel, changes from **Save** may not persist across deployments or cold starts. Use Supabase (or another DB) for durable project metadata in production.
+**By default, links use the path URL:**  
+`https://<your-deployment>.vercel.app/projects/<slug>`  
+(e.g. `https://vastuspace-portal.vercel.app/projects/marble-heights`)
+
+Set **`NEXT_PUBLIC_SITE_URL`** (or rely on `window.location` on the client) so server-rendered links match your deployment.
+
+### Optional: real subdomains (`slug.yourdomain.com`)
+
+You need a **domain you control** (not `*.vercel.app`):
+
+1. Add the domain in Vercel (e.g. `*.vastuspace.com`) and complete DNS.
+2. Set env:
+
+   - `NEXT_PUBLIC_USE_PROJECT_SUBDOMAINS=true`
+   - `ROOT_DOMAIN` / `NEXT_PUBLIC_ROOT_DOMAIN` = same apex host, e.g. `vastuspace.com` (no `https://`)
+   - `NEXT_PUBLIC_SITE_URL` = `https://vastuspace.com`
+
+3. Middleware rewrites `https://{slug}.{ROOT_DOMAIN}/` → `/projects/{slug}`.
+
+**Persisting dashboard edits (location, brief, amenities, …):** If you use Supabase, run `supabase/project_overrides.sql` in the SQL editor. The app will **hydrate** overrides on each cold start and **upsert** after **Save**. Without that table, edits only live in memory (lost on Vercel restarts).
 
 ## 🏗 Adding a Real 3D Model
 

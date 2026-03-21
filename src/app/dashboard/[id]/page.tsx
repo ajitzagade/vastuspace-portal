@@ -269,7 +269,7 @@ export default function ProjectEditorPage({ params }: { params: { id: string } }
     }
   }
 
-  const subdomainUrl = useMemo(() => (project ? getProjectSubdomainUrl(project.slug) : ''), [project])
+  const publicProjectUrl = useMemo(() => (project ? getProjectSubdomainUrl(project.slug) : ''), [project])
 
   if (!project || !editForm) {
     return (
@@ -292,14 +292,14 @@ export default function ProjectEditorPage({ params }: { params: { id: string } }
           <div>
             <h1 className="font-display text-3xl text-ivory font-light">{editForm.name || project.name}</h1>
             <p className="text-ivory/30 text-xs font-mono mt-0.5">
-              {subdomainUrl.replace(/^https?:\/\//, '')} · {editForm.status}
+              {publicProjectUrl.replace(/^https?:\/\//, '')} · {editForm.status}
             </p>
           </div>
         </div>
         <div className="flex flex-col items-end gap-2">
-          <a href={subdomainUrl} target="_blank" rel="noopener noreferrer"
+          <a href={publicProjectUrl} target="_blank" rel="noopener noreferrer"
             className="btn-ghost flex items-center gap-2 text-xs py-2">
-            <Eye size={14} /> Open subdomain site
+            <Eye size={14} /> Open public page
           </a>
           <a href={`/projects/${project.slug}`} target="_blank" rel="noopener noreferrer"
             className="text-ivory/35 text-[11px] font-mono hover:text-gold/80 transition-colors">
@@ -674,16 +674,16 @@ export default function ProjectEditorPage({ params }: { params: { id: string } }
             )}
           </div>
 
-          {/* Subdomain link */}
+          {/* Public URL */}
           <div className="glass rounded-lg border border-gold/10 p-4">
-            <p className="text-ivory/30 text-xs font-mono mb-2">Public URL (subdomain)</p>
+            <p className="text-ivory/30 text-xs font-mono mb-2">Public URL</p>
             <a
-              href={subdomainUrl}
+              href={publicProjectUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="text-gold text-sm font-mono hover:text-gold-light transition-colors break-all block"
             >
-              {subdomainUrl.replace(/^https?:\/\//, '')}
+              {publicProjectUrl.replace(/^https?:\/\//, '')}
             </a>
             <p className="text-ivory/25 text-xs mt-3 font-mono">Path fallback: /projects/{project.slug}</p>
           </div>

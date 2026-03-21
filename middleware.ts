@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-/** Hostname for subdomains: marble-heights.<ROOT_DOMAIN> — set in Vercel to your deployment host */
+/**
+ * Apex host for optional project subdomains (`slug.<ROOT_DOMAIN>`).
+ * Wildcards on `*.vercel.app` are NOT supported by Vercel — use a custom domain here if you enable subdomains.
+ * Default matches typical deployment hostname; local dev uses `*.localhost` in middleware below.
+ */
 const ROOT_DOMAIN = process.env.ROOT_DOMAIN || process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'vastuspace-portal.vercel.app'
 const RESERVED = ['www', 'app', 'admin', 'api', 'static', 'assets']
 

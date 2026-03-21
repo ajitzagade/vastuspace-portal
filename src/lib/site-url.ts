@@ -1,31 +1,34 @@
 /**
- * Public hostname used for project subdomains, e.g. marble-heights.<ROOT_DOMAIN>
- * Set in Vercel: NEXT_PUBLIC_ROOT_DOMAIN=vastuspace-portal.vercel.app
+ * Project “landing” URLs (subdomain vs path).
+ *
+ * Wildcard subdomains are **not** supported on `.vercel.app` (Vercel policy). You cannot use `*.your-project.vercel.app`.
+ * Use path URLs on the default deployment host, or buy a domain and set `NEXT_PUBLIC_USE_PROJECT_SUBDOMAINS=true`
+ * with a wildcard on **your** domain (e.g. `*.vastuspace.com`).
  */
+
+function stripHost(envVal: string | undefined): string {
+  if (!envVal) return ''
+  return envVal.replace(/^https?:\/\//, '').split('/')[0]
+}
+
+/** Apex host for links when not using subdomains (e.g. vastuspace-portal.vercel.app) */
 export function getRootDomain(): string {
-  if (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_ROOT_DOMAIN) {
-    return process.env.NEXT_PUBLIC_ROOT_DOMAIN.replace(/^https?:\/\//, '').split('/')[0]
-  }
-  if (typeof process !== 'undefined' && process.env.ROOT_DOMAIN) {
-    return process.env.ROOT_DOMAIN.replace(/^https?:\/\//, '').split('/')[0]
-  }
+  const site = typeof process !== 'undefined' && process.env.NEXT_PUBLIC_SITE_URL
+  if (site) return stripHost(site) || 'localhost'
+  const fromEnv =
+    typeof process !== 'undefined' && (process.env.NEXT_PUBLIC_ROOT_DOMAIN || process.env.ROOT_DOMAIN)
+  if (fromEnv) return stripHost(fromEnv)
   return 'vastuspace-portal.vercel.app'
 }
 
-/** Apex site URL (no subdomain), e.g. https://vastuspace-portal.vercel.app */
+/** Apex site URL (no project slug), e.g. https://vastuspace-portal.vercel.app */
 export function getSiteOrigin(): string {
   const fromEnv = typeof process !== 'undefined' && process.env.NEXT_PUBLIC_SITE_URL
   if (fromEnv) return fromEnv.replace(/\/$/, '')
   return `https://${getRootDomain()}`
 }
 
-/** Project landing on subdomain: https://{slug}.{rootDomain} */
-export function getProjectSubdomainUrl(slug: string): string {
-  const root = getRootDomain()
-  return `https://${slug}.${root}`
-}
-
-/** Path-based URL on apex (fallback / local): {origin}/projects/{slug} */
+/** Path-based URL — always works on Vercel without extra DNS: /projects/{slug} */
 export function getProjectPathUrl(slug: string): string {
   if (typeof window !== 'undefined') {
     return `${window.location.origin}/projects/${slug}`
@@ -34,7 +37,28 @@ export function getProjectPathUrl(slug: string): string {
 }
 
 /**
- * Prefer subdomain in production when ROOT_DOMAIN is set; use path URL on localhost without subdomain DNS.
+ * Canonical share URL for a project.
+ * - Default: path on apex (`/projects/slug`) — works on your normal `project.vercel.app` URL without extra DNS.
+ * - Optional: `https://{slug}.{root}` when `NEXT_PUBLIC_USE_PROJECT_SUBDOMAINS=true` and you own DNS + wildcard.
+ */
+export function getProjectSubdomainUrl(slug: string): string {
+  const useSub =
+    typeof process !== 'undefined' && process.env.NEXT_PUBLIC_USE_PROJECT_SUBDOMAINS === 'true'
+  if (useSub) {
+    const root = stripHost(
+      typeof process !== 'undefined'
+        ? process.env.NEXT_PUBLIC_ROOT_DOMAIN || process.env.ROOT_DOMAIN
+        : '',
+    )
+    if (root) {
+      return `https://${slug}.${root}`
+    }
+  }
+  return getProjectPathUrl(slug)
+}
+
+/**
+ * Prefer path on localhost; otherwise same as {@link getProjectSubdomainUrl} (path by default).
  */
 export function getProjectPublicUrl(slug: string): string {
   if (typeof window !== 'undefined') {
