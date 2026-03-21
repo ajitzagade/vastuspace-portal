@@ -124,7 +124,8 @@ export default function PropertyGallery({ project }: { project: Project }) {
             )}
 
             <div className="w-full h-[60vh] rounded-sm overflow-hidden border border-gold/20 bg-obsidian-800">
-              <Scene3D modelUrl={selectedModel.cdn_url} />
+              {/* key=asset id forces full remount when switching tabs — R3F/useGLTF otherwise keeps the previous scene */}
+              <Scene3D key={selectedModel.id} modelUrl={selectedModel.cdn_url} />
             </div>
             <p className="text-ivory/20 text-xs font-mono text-center mt-3">
               {selectedModel.metadata.original_name || 'model.glb'} · Full screen 3D experience
