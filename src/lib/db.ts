@@ -184,10 +184,22 @@ function mergeStoredProject(base: Project, patch: Partial<Project>): Project {
   return next
 }
 
+/** Rebuild a project from `project_overrides.payload` (used for user-created projects not in seed). */
+function projectFromPayload(payload: Partial<Project>): Project | null {
+  if (!payload.id || !payload.slug || !payload.name) return null
+  const loc = payload.location
+  return {
+    ...(payload as Project),
+    assets: [],
+    testimonials: payload.testimonials ?? [],
+    location: loc ? normalizeLocation(loc as Parameters<typeof normalizeLocation>[0]) : payload.location,
+  }
+}
+
 /**
  * Apply `project_overrides` rows onto the in-memory project list.
- * Runs on every read (not once per process): if the first request saw an empty table and later
- * rows were saved, a one-shot hydrate would never pick them up — that caused stale UI.
+ * - Seed projects (id 1,2,3…): merge override onto existing row.
+ * - New projects (UUID): append from payload when not already in memory (cold start / other instance).
  */
 async function hydrateProjectOverridesFromSupabase(): Promise<void> {
   if (!isSupabaseConfigured()) return
@@ -203,8 +215,15 @@ async function hydrateProjectOverridesFromSupabase(): Promise<void> {
   for (const row of data ?? []) {
     const pid = String((row as { project_id: string }).project_id)
     const idx = projects.findIndex(p => p.id === pid)
-    if (idx === -1) continue
-    projects[idx] = mergeStoredProject(projects[idx], (row.payload ?? {}) as Partial<Project>)
+    const patch = (row.payload ?? {}) as Partial<Project>
+
+    if (idx === -1) {
+      const created = projectFromPayload(patch)
+      if (created) projects.push(created)
+      continue
+    }
+
+    projects[idx] = mergeStoredProject(projects[idx], patch)
   }
 }
 
@@ -336,6 +355,7 @@ export async function createProject(data: ProjectFormData): Promise<Project> {
   }
 
   projects.push(newProject)
+  await persistProjectOverride(newProject)
   return newProject
 }
 

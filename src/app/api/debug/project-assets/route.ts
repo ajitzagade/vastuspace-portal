@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server'
+import { requireAdminSession } from '@/lib/auth-api'
 import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase/admin'
 
 export async function GET(req: Request) {
+  const unauthorized = requireAdminSession()
+  if (unauthorized) return unauthorized
   const url = new URL(req.url)
   const projectId = url.searchParams.get('project_id')
 

@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+/** Must match `ADMIN_SESSION_COOKIE` in `src/lib/auth-session.ts` (avoid importing crypto in Edge). */
+const ADMIN_SESSION_COOKIE = 'vastuspace_admin_session'
+
 /**
  * Apex host for optional project subdomains (`slug.<ROOT_DOMAIN>`).
  * Wildcards on `*.vercel.app` are NOT supported by Vercel — use a custom domain here if you enable subdomains.
@@ -23,6 +26,17 @@ function apexOrigin(req: NextRequest): string {
 export function middleware(req: NextRequest) {
   const hostname = req.headers.get('host') || ''
   const url = req.nextUrl.clone()
+  const pathname = url.pathname
+
+  // Require session cookie for admin dashboard (full verification in dashboard layout + API routes)
+  if (pathname.startsWith('/dashboard')) {
+    const session = req.cookies.get(ADMIN_SESSION_COOKIE)?.value
+    if (!session) {
+      const login = new URL('/login', req.url)
+      login.searchParams.set('redirect', pathname + url.search)
+      return NextResponse.redirect(login)
+    }
+  }
 
   const host = hostname.replace(':3000', '').replace(':3001', '')
 
@@ -38,7 +52,7 @@ export function middleware(req: NextRequest) {
   }
 
   // Non-root paths on a project subdomain → same path on apex (dashboard lives on main host)
-  if (url.pathname !== '/' && url.pathname !== '') {
+  if (pathname !== '/' && pathname !== '') {
     try {
       const target = new URL(url.pathname + url.search, apexOrigin(req))
       return NextResponse.redirect(target)

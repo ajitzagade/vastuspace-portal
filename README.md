@@ -9,12 +9,19 @@ npm run dev
 
 No database needed — everything uses seeded in-memory data.
 
+## 🔐 Admin login
+
+- **URL:** `/login` (nav **Admin** on the homepage goes here).
+- **Defaults:** username `admin`, password `admin` (override with `ADMIN_USERNAME` / `ADMIN_PASSWORD` in `.env.local`).
+- **Production:** set `ADMIN_SESSION_SECRET` to a long random string (signs the session cookie).
+
 ## 🗺 Local URLs
 
 | Page | URL |
 |------|-----|
 | Homepage | http://localhost:3000 |
-| Admin Dashboard | http://localhost:3000/dashboard |
+| Admin sign in | http://localhost:3000/login |
+| Admin Dashboard | http://localhost:3000/dashboard (redirects to `/login` if not signed in) |
 | Create New Project | http://localhost:3000/dashboard/new |
 | Marble Heights | http://localhost:3000/projects/marble-heights |
 | Ocean Vista | http://localhost:3000/projects/ocean-vista |
@@ -22,7 +29,9 @@ No database needed — everything uses seeded in-memory data.
 
 ## 📁 Key Files
 
-- `src/lib/db.ts` — In-memory data store with 3 seed projects (swap with Supabase later)
+- `docs/ARCHITECTURE.md` — End-to-end data flow, admin auth, Supabase tables
+- `src/lib/auth-session.ts` — Admin session cookie + HMAC
+- `src/lib/db.ts` — In-memory data store with 3 seed projects + Supabase overrides/assets
 - `src/components/3d/BuildingScene.tsx` — Three.js procedural building (swap with useGLTF for real models)
 - `src/components/landing/PropertyHero.tsx` — Hero with 3D canvas + parallax
 - `src/app/dashboard/new/page.tsx` — Multi-step project creation wizard

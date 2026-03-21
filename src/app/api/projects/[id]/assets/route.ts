@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { requireAdminSession } from '@/lib/auth-api'
 import { addAsset, deleteAsset, getProjectById } from '@/lib/db'
 import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase/admin'
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+  const unauthorized = requireAdminSession()
+  if (unauthorized) return unauthorized
   const project = await getProjectById(params.id)
   if (!project) return NextResponse.json({ error: 'Project not found' }, { status: 404 })
 
@@ -135,6 +138,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+  const unauthorized = requireAdminSession()
+  if (unauthorized) return unauthorized
   const contentType = req.headers.get('content-type') || ''
   const bucketName = process.env.SUPABASE_ASSET_BUCKET || 'property-assets'
 

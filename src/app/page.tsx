@@ -22,7 +22,7 @@ export default async function HomePage() {
             <a href="#projects" className="hover:text-gold transition-colors">Projects</a>
             <a href="#testimonials" className="hover:text-gold transition-colors">Testimonials</a>
             <a href="#contact" className="hover:text-gold transition-colors">Contact</a>
-            <Link href="/dashboard" className="border border-gold/40 text-gold px-5 py-2 hover:bg-gold/10 transition-colors">
+            <Link href="/login?redirect=/dashboard" className="border border-gold/40 text-gold px-5 py-2 hover:bg-gold/10 transition-colors">
               Admin
             </Link>
           </div>

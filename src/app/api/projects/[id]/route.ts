@@ -1,14 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
+import { requireAdminSession } from '@/lib/auth-api'
 import { getProjectById, updateProject } from '@/lib/db'
 
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
+  const unauthorized = requireAdminSession()
+  if (unauthorized) return unauthorized
   const project = await getProjectById(params.id)
   if (!project) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   return NextResponse.json(project)
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+  const unauthorized = requireAdminSession()
+  if (unauthorized) return unauthorized
   let body: Record<string, unknown>
   try {
     body = await req.json()
