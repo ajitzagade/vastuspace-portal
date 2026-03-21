@@ -47,6 +47,9 @@ const SEED_PROJECTS: Project[] = [
       { id: 'a2', project_id: '1', type: 'image', storage_path: 'projects/marble-heights/interior1.jpg', cdn_url: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&q=80', metadata: { is_hero: false, order: 1, original_name: 'interior1.jpg' }, created_at: new Date().toISOString() },
       { id: 'a3', project_id: '1', type: 'image', storage_path: 'projects/marble-heights/interior2.jpg', cdn_url: 'https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?w=1200&q=80', metadata: { is_hero: false, order: 2, original_name: 'interior2.jpg' }, created_at: new Date().toISOString() },
       { id: 'a4', project_id: '1', type: '3d_model', storage_path: 'projects/marble-heights/model.glb', cdn_url: '/models/sample-building.glb', metadata: { is_hero: false, order: 0, original_name: 'marble-heights-model.glb' }, created_at: new Date().toISOString() },
+      { id: 'a5', project_id: '1', type: '3d_model', storage_path: 'projects/marble-heights/sample-tower.glb', cdn_url: '/models/sample-tower.glb', metadata: { is_hero: false, order: 1, original_name: 'sample-tower.glb' }, created_at: new Date().toISOString() },
+      { id: 'a6', project_id: '1', type: '3d_model', storage_path: 'projects/marble-heights/sample-villa.glb', cdn_url: '/models/sample-villa.glb', metadata: { is_hero: false, order: 2, original_name: 'sample-villa.glb' }, created_at: new Date().toISOString() },
+      { id: 'a7', project_id: '1', type: '3d_model', storage_path: 'projects/marble-heights/sample-pavilion.glb', cdn_url: '/models/sample-pavilion.glb', metadata: { is_hero: false, order: 3, original_name: 'sample-pavilion.glb' }, created_at: new Date().toISOString() },
     ]
   },
   {
@@ -87,6 +90,10 @@ const SEED_PROJECTS: Project[] = [
     assets: [
       { id: 'b1', project_id: '2', type: 'image', storage_path: 'projects/ocean-vista/hero.jpg', cdn_url: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1600&q=80', metadata: { is_hero: true, order: 0, original_name: 'hero.jpg' }, created_at: new Date().toISOString() },
       { id: 'b2', project_id: '2', type: 'image', storage_path: 'projects/ocean-vista/interior1.jpg', cdn_url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80', metadata: { is_hero: false, order: 1, original_name: 'interior1.jpg' }, created_at: new Date().toISOString() },
+      { id: 'b3', project_id: '2', type: '3d_model', storage_path: 'projects/ocean-vista/sample-building.glb', cdn_url: '/models/sample-building.glb', metadata: { is_hero: false, order: 0, original_name: 'ocean-vista-base.glb' }, created_at: new Date().toISOString() },
+      { id: 'b4', project_id: '2', type: '3d_model', storage_path: 'projects/ocean-vista/sample-tower.glb', cdn_url: '/models/sample-tower.glb', metadata: { is_hero: false, order: 1, original_name: 'sample-tower.glb' }, created_at: new Date().toISOString() },
+      { id: 'b5', project_id: '2', type: '3d_model', storage_path: 'projects/ocean-vista/sample-villa.glb', cdn_url: '/models/sample-villa.glb', metadata: { is_hero: false, order: 2, original_name: 'sample-villa.glb' }, created_at: new Date().toISOString() },
+      { id: 'b6', project_id: '2', type: '3d_model', storage_path: 'projects/ocean-vista/sample-pavilion.glb', cdn_url: '/models/sample-pavilion.glb', metadata: { is_hero: false, order: 3, original_name: 'sample-pavilion.glb' }, created_at: new Date().toISOString() },
     ]
   },
   {
@@ -125,6 +132,10 @@ const SEED_PROJECTS: Project[] = [
     created_at: new Date().toISOString(),
     assets: [
       { id: 'c1', project_id: '3', type: 'image', storage_path: 'projects/verdant-manor/hero.jpg', cdn_url: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1600&q=80', metadata: { is_hero: true, order: 0, original_name: 'hero.jpg' }, created_at: new Date().toISOString() },
+      { id: 'c2', project_id: '3', type: '3d_model', storage_path: 'projects/verdant-manor/sample-building.glb', cdn_url: '/models/sample-building.glb', metadata: { is_hero: false, order: 0, original_name: 'verdant-manor-base.glb' }, created_at: new Date().toISOString() },
+      { id: 'c3', project_id: '3', type: '3d_model', storage_path: 'projects/verdant-manor/sample-tower.glb', cdn_url: '/models/sample-tower.glb', metadata: { is_hero: false, order: 1, original_name: 'sample-tower.glb' }, created_at: new Date().toISOString() },
+      { id: 'c4', project_id: '3', type: '3d_model', storage_path: 'projects/verdant-manor/sample-villa.glb', cdn_url: '/models/sample-villa.glb', metadata: { is_hero: false, order: 2, original_name: 'sample-villa.glb' }, created_at: new Date().toISOString() },
+      { id: 'c5', project_id: '3', type: '3d_model', storage_path: 'projects/verdant-manor/sample-pavilion.glb', cdn_url: '/models/sample-pavilion.glb', metadata: { is_hero: false, order: 3, original_name: 'sample-pavilion.glb' }, created_at: new Date().toISOString() },
     ]
   }
 ]
