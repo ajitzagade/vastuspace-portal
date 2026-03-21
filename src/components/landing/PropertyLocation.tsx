@@ -2,7 +2,7 @@
 
 import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
-import { MapPin, Navigation, Train, Plane } from 'lucide-react'
+import { MapPin, Navigation, Train, Plane, ExternalLink, MapPinned } from 'lucide-react'
 import { Project } from '@/types'
 
 export default function PropertyLocation({ project }: { project: Project }) {
@@ -13,6 +13,11 @@ export default function PropertyLocation({ project }: { project: Project }) {
 
   const { address, city, country, lat, lng } = project.location
   const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.02}%2C${lat - 0.02}%2C${lng + 0.02}%2C${lat + 0.02}&layer=mapnik&marker=${lat}%2C${lng}`
+
+  const placeQuery = encodeURIComponent(`${address}, ${city}, ${country}`)
+  const googleOpenUrl = `https://www.google.com/maps/search/?api=1&query=${placeQuery}`
+  const googleCoordsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
+  const googleDirectionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
 
   const nearbyFromAmenities = project.amenities?.location || []
 
@@ -55,9 +60,40 @@ export default function PropertyLocation({ project }: { project: Project }) {
                 <div className="w-4 h-4 rounded-full bg-gold border-2 border-white shadow-lg animate-pulse" />
               </div>
             </div>
-            <div className="mt-4 flex items-center gap-3 text-ivory/50 text-sm font-body">
-              <MapPin size={14} className="text-gold flex-shrink-0" />
-              <span>{address}, {city}, {country}</span>
+            <div className="mt-4 flex flex-col gap-3">
+              <div className="flex items-center gap-3 text-ivory/50 text-sm font-body">
+                <MapPin size={14} className="text-gold flex-shrink-0" />
+                <span>{address}, {city}, {country}</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <a
+                  href={googleOpenUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs font-mono px-3 py-2 rounded-sm border border-gold/25 text-gold/80 hover:bg-gold/10 hover:border-gold/40 transition-colors"
+                >
+                  <MapPinned size={12} strokeWidth={1.5} />
+                  Open in Maps
+                  <ExternalLink size={10} className="opacity-60" />
+                </a>
+                <a
+                  href={googleDirectionsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs font-mono px-3 py-2 rounded-sm border border-gold/20 text-ivory/60 hover:border-gold/35 hover:text-ivory transition-colors"
+                >
+                  <Navigation size={12} strokeWidth={1.5} />
+                  Directions
+                </a>
+                <a
+                  href={googleCoordsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs font-mono text-ivory/35 hover:text-gold/70 transition-colors"
+                >
+                  Pin · {lat.toFixed(4)}, {lng.toFixed(4)}
+                </a>
+              </div>
             </div>
           </motion.div>
 

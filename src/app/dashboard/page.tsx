@@ -1,4 +1,5 @@
 import { getProjects } from '@/lib/db'
+import { getProjectSubdomainUrl } from '@/lib/site-url'
 import Link from 'next/link'
 import { Plus, Eye, Edit, Globe, TrendingUp, Building2 } from 'lucide-react'
 import { Project } from '@/types'
@@ -75,7 +76,9 @@ function ProjectRow({ project }: { project: Project }) {
             <StatusBadge status={project.status} />
           </div>
           <div className="flex items-center gap-4 text-xs text-ivory/40 font-body">
-            <span className="font-mono text-gold/50">{project.slug}.vastuspace.com</span>
+            <span className="font-mono text-gold/50">
+              {getProjectSubdomainUrl(project.slug).replace(/^https?:\/\//, '')}
+            </span>
             {project.location && <span>📍 {project.location.city}</span>}
             {project.price && <span>{project.price}</span>}
             {project.bedrooms && <span>{project.bedrooms} BHK</span>}

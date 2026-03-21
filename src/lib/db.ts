@@ -1,5 +1,6 @@
 // LOCAL DEV: In-memory store replacing Supabase
 import { Project, ProjectAsset, ProjectFormData } from '@/types'
+import { getProjectSubdomainUrl } from '@/lib/site-url'
 import { v4 as uuidv4 } from 'uuid'
 import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase/admin'
 
@@ -258,18 +259,58 @@ export async function createProject(data: ProjectFormData): Promise<Project> {
   return newProject
 }
 
-export async function updateProject(id: string, data: Partial<ProjectFormData>): Promise<Project | null> {
+function parseOptionalInt(v: string | number | undefined, fallback: number | undefined): number | undefined {
+  if (v === undefined || v === '') return fallback
+  const n = typeof v === 'number' ? v : parseInt(String(v), 10)
+  return Number.isFinite(n) ? n : fallback
+}
+
+/** Partial update for dashboard / API PATCH — merges nested location & amenities. */
+export async function updateProject(
+  id: string,
+  data: Partial<ProjectFormData> & {
+    location?: Project['location']
+    amenities?: Project['amenities']
+    tagline?: string
+    brief?: string
+    bedrooms?: string | number
+    bathrooms?: string | number
+    area_sqft?: string | number
+  },
+): Promise<Project | null> {
   const idx = projects.findIndex(p => p.id === id)
   if (idx === -1) return null
-  projects[idx] = {
-    ...projects[idx],
-    ...data,
-    bedrooms: data.bedrooms ? parseInt(data.bedrooms) : projects[idx].bedrooms,
-    bathrooms: data.bathrooms ? parseInt(data.bathrooms) : projects[idx].bathrooms,
-    area_sqft: data.area_sqft ? parseInt(data.area_sqft) : projects[idx].area_sqft,
+  const cur = projects[idx]
+
+  const next: Project = {
+    ...cur,
     updated_at: new Date().toISOString(),
   }
-  return projects[idx]
+
+  if (data.name !== undefined) next.name = data.name
+  if (data.tagline !== undefined) next.tagline = data.tagline
+  if (data.brief !== undefined) next.brief = data.brief
+  if (data.price !== undefined) next.price = data.price
+  if (data.year_completion !== undefined) next.year_completion = data.year_completion
+  if (data.status !== undefined) next.status = data.status
+
+  if (data.bedrooms !== undefined) next.bedrooms = parseOptionalInt(data.bedrooms, cur.bedrooms)
+  if (data.bathrooms !== undefined) next.bathrooms = parseOptionalInt(data.bathrooms, cur.bathrooms)
+  if (data.area_sqft !== undefined) next.area_sqft = parseOptionalInt(data.area_sqft, cur.area_sqft)
+
+  if (data.location !== undefined) {
+    next.location = {
+      ...(cur.location || { lat: 0, lng: 0, address: '', city: '', country: '' }),
+      ...data.location,
+    }
+  }
+
+  if (data.amenities !== undefined) {
+    next.amenities = data.amenities
+  }
+
+  projects[idx] = next
+  return next
 }
 
 export async function deleteProject(id: string): Promise<boolean> {
@@ -301,5 +342,5 @@ export async function deleteAsset(projectId: string, assetId: string): Promise<b
 }
 
 export function slugToSubdomain(slug: string): string {
-  return `http://localhost:3000/projects/${slug}`
+  return getProjectSubdomainUrl(slug)
 }

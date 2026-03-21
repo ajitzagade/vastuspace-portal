@@ -1,4 +1,5 @@
 import { getProjects } from '@/lib/db'
+import { getProjectSubdomainUrl } from '@/lib/site-url'
 import Link from 'next/link'
 import { ArrowRight, Building2, MapPin, Star, ChevronDown } from 'lucide-react'
 import ContactForm from '@/components/landing/ContactForm'
@@ -85,7 +86,9 @@ export default async function HomePage() {
                   </div>
                 </div>
                 <div className="p-4 flex items-center justify-between">
-                  <span className="text-gold/60 text-xs font-mono tracking-widest">{published[0].slug}.vastuspace.com</span>
+                  <span className="text-gold/60 text-xs font-mono tracking-widest">
+                    {getProjectSubdomainUrl(published[0].slug).replace(/^https?:\/\//, '')}
+                  </span>
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 </div>
               </Link>

@@ -33,10 +33,18 @@ No database needed — everything uses seeded in-memory data.
 2. Add URL + anon key to `.env.local`
 3. Replace functions in `src/lib/db.ts` with Supabase client calls
 
-## 🌐 Production Subdomains
+## 🌐 Production subdomains (e.g. `marble-heights.vastuspace-portal.vercel.app`)
 
-The middleware (`middleware.ts`) routes `slug.domain.com` → `/projects/slug` automatically.
-Add wildcard DNS `* → cname.vercel-dns.com` and set `ROOT_DOMAIN=yourdomain.com` in env.
+1. In **Vercel → Project → Domains**, add a **wildcard** host: `*.vastuspace-portal.vercel.app` (or your custom apex).
+2. Set env (Production + Preview):
+
+   - `ROOT_DOMAIN` = `vastuspace-portal.vercel.app` (no `https://`)
+   - `NEXT_PUBLIC_ROOT_DOMAIN` = same (used for links in the UI)
+   - `NEXT_PUBLIC_SITE_URL` = `https://vastuspace-portal.vercel.app` (apex URL for redirects from subdomains)
+
+3. Middleware (`middleware.ts`) rewrites `https://{slug}.{ROOT_DOMAIN}/` → `/projects/{slug}`. Other paths on a project host redirect to the apex (e.g. `/dashboard`).
+
+**Note:** Project edits are stored in **in-memory** data on the server. On Vercel, changes from **Save** may not persist across deployments or cold starts. Use Supabase (or another DB) for durable project metadata in production.
 
 ## 🏗 Adding a Real 3D Model
 

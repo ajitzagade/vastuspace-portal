@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { Project } from '@/types'
 import { Send, Check, Phone, Mail, MapPin } from 'lucide-react'
+import { getProjectSubdomainUrl } from '@/lib/site-url'
 
 export default function PropertyEnquire({ project }: { project: Project }) {
   const ref = useRef<HTMLDivElement>(null)
@@ -158,7 +159,14 @@ export default function PropertyEnquire({ project }: { project: Project }) {
       {/* Footer */}
       <div className="relative max-w-6xl mx-auto mt-24 pt-10 border-t border-gold/10 flex items-center justify-between">
         <span className="font-display text-gold tracking-widest font-light">VASTUSPACE</span>
-        <span className="text-ivory/20 text-xs font-mono">{project.slug}.vastuspace.com</span>
+        <a
+          href={getProjectSubdomainUrl(project.slug)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-ivory/20 text-xs font-mono hover:text-gold/60 transition-colors"
+        >
+          {getProjectSubdomainUrl(project.slug).replace(/^https?:\/\//, '')}
+        </a>
         <span className="text-ivory/20 text-xs font-mono">© 2026</span>
       </div>
     </section>
