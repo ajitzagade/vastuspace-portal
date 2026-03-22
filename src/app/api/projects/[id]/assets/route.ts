@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAdminSession } from '@/lib/auth-api'
 import { addAsset, deleteAsset, getProjectById } from '@/lib/db'
 import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase/admin'
+import { sanitizeStorageFileName } from '@/lib/storage-path'
 
 /** FormData / JSON sometimes omit or stringify metadata; keep dashboard + public UI stable. */
 function normalizeAssetResponse(row: Record<string, unknown>) {
@@ -76,7 +77,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     }
 
     const supabase = getSupabaseAdmin()
-    const storagePath = `projects/${project.slug}/${Date.now()}-${originalName}`
+    const safeName = sanitizeStorageFileName(originalName)
+    const storagePath = `projects/${project.slug}/${Date.now()}-${safeName}`
 
     const { error: uploadError } = await supabase.storage.from(bucketName).upload(storagePath, file, {
       contentType: file.type || undefined,
@@ -140,7 +142,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
   const supabase = getSupabaseAdmin()
   const originalName = original_name || 'asset'
-  const storagePath = `projects/${project.slug}/external-${Date.now()}-${originalName}`
+  const storagePath = `projects/${project.slug}/external-${Date.now()}-${sanitizeStorageFileName(originalName)}`
 
   const metadata = { original_name: originalName, is_hero: !!is_hero, order: project.assets?.length || 0 }
 
