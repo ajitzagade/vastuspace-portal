@@ -3,6 +3,32 @@ import { requireAdminSession } from '@/lib/auth-api'
 import { addAsset, deleteAsset, getProjectById } from '@/lib/db'
 import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase/admin'
 
+/** FormData / JSON sometimes omit or stringify metadata; keep dashboard + public UI stable. */
+function normalizeAssetResponse(row: Record<string, unknown>) {
+  const rawMeta = row.metadata
+  const metadata =
+    rawMeta && typeof rawMeta === 'object' && !Array.isArray(rawMeta)
+      ? (rawMeta as Record<string, unknown>)
+      : {}
+  return { ...row, metadata }
+}
+
+function parseFormBool(v: FormDataEntryValue | null): boolean {
+  if (v == null) return false
+  if (typeof v === 'string') {
+    const s = v.trim().toLowerCase()
+    if (s === 'true' || s === '1' || s === 'yes') return true
+    if (s === 'false' || s === '0' || s === '' || s === 'null') return false
+    try {
+      const parsed = JSON.parse(s) as unknown
+      return parsed === true || parsed === 'true'
+    } catch {
+      return false
+    }
+  }
+  return Boolean(v)
+}
+
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const unauthorized = requireAdminSession()
   if (unauthorized) return unauthorized
@@ -26,7 +52,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     const isHeroRaw = formData.get('is_hero')
     const cdnUrlRaw = formData.get('cdn_url')
 
-    const isHero = typeof isHeroRaw === 'string' ? isHeroRaw === 'true' : Boolean(isHeroRaw)
+    const isHero = parseFormBool(isHeroRaw)
 
     const type =
       typeRaw === 'image' || typeRaw === '3d_model' || typeRaw === 'floor_plan'
@@ -46,7 +72,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         cdn_url: typeof cdnUrlRaw === 'string' ? cdnUrlRaw : '',
         metadata: { original_name: originalName, is_hero: isHero, order: project.assets?.length || 0 },
       })
-      return NextResponse.json(asset, { status: 201 })
+      return NextResponse.json(normalizeAssetResponse(asset as unknown as Record<string, unknown>), { status: 201 })
     }
 
     const supabase = getSupabaseAdmin()
@@ -89,7 +115,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       return NextResponse.json({ error: insertError.message }, { status: 500 })
     }
 
-    return NextResponse.json(inserted, { status: 201 })
+    return NextResponse.json(normalizeAssetResponse(inserted as unknown as Record<string, unknown>), { status: 201 })
   }
 
   // Paste URL (JSON)
@@ -109,7 +135,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       metadata: { original_name, is_hero: !!is_hero, order: project.assets?.length || 0 },
     })
 
-    return NextResponse.json(asset, { status: 201 })
+    return NextResponse.json(normalizeAssetResponse(asset as unknown as Record<string, unknown>), { status: 201 })
   }
 
   const supabase = getSupabaseAdmin()
@@ -134,7 +160,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     return NextResponse.json({ error: insertError.message }, { status: 500 })
   }
 
-  return NextResponse.json(inserted, { status: 201 })
+  return NextResponse.json(normalizeAssetResponse(inserted as unknown as Record<string, unknown>), { status: 201 })
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {

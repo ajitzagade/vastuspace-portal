@@ -32,19 +32,23 @@ export default function PropertyGallery({ project }: { project: Project }) {
     const bt = b.created_at ? new Date(b.created_at).getTime() : 0
     return bt - at
   })
-  const nonHero = sortedImages.filter(a => !a.metadata.is_hero)
+  const nonHero = sortedImages.filter(a => !a.metadata?.is_hero)
+
+  // Organic grid: prefer non-hero shots so the hero banner isn't duplicated.
+  // If every image is marked hero (common for a single upload), still show real uploads — never fall back to placeholders.
+  const gridImages = nonHero.length > 0 ? nonHero : sortedImages
 
   const sortedModels3D = [...models3D].sort((a, b) => {
-    const aHero = a.metadata.is_hero ? 1 : 0
-    const bHero = b.metadata.is_hero ? 1 : 0
+    const aHero = a.metadata?.is_hero ? 1 : 0
+    const bHero = b.metadata?.is_hero ? 1 : 0
     if (aHero !== bHero) return bHero - aHero // hero first
 
-    const aOrder = a.metadata.order ?? 0
-    const bOrder = b.metadata.order ?? 0
+    const aOrder = a.metadata?.order ?? 0
+    const bOrder = b.metadata?.order ?? 0
     if (aOrder !== bOrder) return aOrder - bOrder
 
-    const aName = a.metadata.original_name ?? a.storage_path
-    const bName = b.metadata.original_name ?? b.storage_path
+    const aName = a.metadata?.original_name ?? a.storage_path
+    const bName = b.metadata?.original_name ?? b.storage_path
     return aName.localeCompare(bName)
   })
 
@@ -59,7 +63,7 @@ export default function PropertyGallery({ project }: { project: Project }) {
   }, [project.id])
 
   // Use real assets if available, fallback images otherwise
-  const displayImages = nonHero.length > 0 ? nonHero : [
+  const displayImages = gridImages.length > 0 ? gridImages : [
     { id: 'f1', cdn_url: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&q=80', metadata: { order: 0 } },
     { id: 'f2', cdn_url: 'https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?w=1200&q=80', metadata: { order: 1 } },
     { id: 'f3', cdn_url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80', metadata: { order: 2 } },
@@ -90,7 +94,7 @@ export default function PropertyGallery({ project }: { project: Project }) {
                 <p className="text-gold/60 text-xs font-mono mt-1">Interactive 3D Model — drag to rotate, scroll to zoom</p>
                 {supportedModels3D.length > 0 && (
                   <p className="text-ivory/50 text-[11px] font-mono mt-2">
-                    Models: {supportedModels3D.length} · Selected: {selectedModel?.metadata.original_name || selectedModel?.storage_path || '—'}
+                    Models: {supportedModels3D.length} · Selected: {selectedModel?.metadata?.original_name || selectedModel?.storage_path || '—'}
                   </p>
                 )}
               </div>
@@ -102,7 +106,7 @@ export default function PropertyGallery({ project }: { project: Project }) {
             {supportedModels3D.length > 0 && (
               <div className="flex flex-wrap gap-2 justify-center mb-4 relative z-[60] px-3">
                 {supportedModels3D.map((m, idx) => {
-                  const rawLabel = m.metadata.original_name ?? m.storage_path
+                  const rawLabel = m.metadata?.original_name ?? m.storage_path
                   const label = rawLabel.replace(/\.[^.]+$/, '')
                   const active = idx === selectedModelIndex
 
@@ -128,7 +132,7 @@ export default function PropertyGallery({ project }: { project: Project }) {
               <Scene3D key={selectedModel.id} modelUrl={selectedModel.cdn_url} />
             </div>
             <p className="text-ivory/20 text-xs font-mono text-center mt-3">
-              {selectedModel.metadata.original_name || 'model.glb'} · Full screen 3D experience
+              {selectedModel.metadata?.original_name || 'model.glb'} · Full screen 3D experience
             </p>
           </div>
         </div>

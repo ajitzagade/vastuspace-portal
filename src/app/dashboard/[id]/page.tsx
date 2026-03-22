@@ -72,6 +72,11 @@ interface EditForm {
   amenityLines: Record<keyof Amenities, string>
 }
 
+/** Supabase/API may omit `metadata`; avoid runtime errors on thumbnails. */
+function assetMeta(a: Asset) {
+  return a.metadata ?? {}
+}
+
 function projectToEditForm(p: Project): EditForm {
   return {
     name: p.name,
@@ -134,7 +139,7 @@ export default function ProjectEditorPage({ params }: { params: { id: string } }
 
   useEffect(() => {
     syncedProjectIdRef.current = null
-    fetch('/api/projects')
+    fetch('/api/projects', { credentials: 'include' })
       .then(r => r.json())
       .then((all: Project[]) => {
         const found = all.find(p => p.id === params.id)
@@ -208,6 +213,7 @@ export default function ProjectEditorPage({ params }: { params: { id: string } }
       const res = await fetch(`/api/projects/${project.id}/assets`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           type: uploadType,
           cdn_url: urlInput.trim(),
@@ -215,8 +221,20 @@ export default function ProjectEditorPage({ params }: { params: { id: string } }
           is_hero: isHero,
         }),
       })
-      if (!res.ok) throw new Error('Upload failed')
-      const newAsset = await res.json()
+      const raw = (await res.json()) as Record<string, unknown>
+      if (!res.ok) {
+        throw new Error(typeof raw?.error === 'string' ? raw.error : 'Upload failed')
+      }
+      const newAsset: Asset = {
+        id: String(raw.id),
+        type: raw.type as Asset['type'],
+        cdn_url: String(raw.cdn_url ?? ''),
+        metadata:
+          raw.metadata && typeof raw.metadata === 'object' && !Array.isArray(raw.metadata)
+            ? (raw.metadata as Asset['metadata'])
+            : {},
+        created_at: typeof raw.created_at === 'string' ? raw.created_at : new Date().toISOString(),
+      }
       setProject(p => p ? { ...p, assets: [...(p.assets || []), newAsset] } : p)
       setUrlInput('')
       setIsHero(false)
@@ -224,8 +242,8 @@ export default function ProjectEditorPage({ params }: { params: { id: string } }
         uploadType === '3d_model' ? '3D model added successfully!' : uploadType === 'floor_plan' ? 'Floor plan added successfully!' : 'Asset added successfully!',
       )
       setTimeout(() => setUploadSuccess(''), 3000)
-    } catch {
-      setUploadError('Failed to add asset. Check the URL and try again.')
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'Failed to add asset. Check the URL and try again.')
     } finally {
       setUploading(false)
     }
@@ -250,19 +268,36 @@ export default function ProjectEditorPage({ params }: { params: { id: string } }
             : 'image'
       formData.append('type', inferredType)
       formData.append('original_name', file.name)
-      formData.append('is_hero', JSON.stringify(isHero))
+      formData.append('is_hero', isHero ? 'true' : 'false')
       formData.append('cdn_url', objectUrl)
 
       const res = await fetch(`/api/projects/${project.id}/assets`, {
         method: 'POST',
         body: formData,
+        credentials: 'include',
       })
-      const newAsset = await res.json()
+      const raw = (await res.json()) as Record<string, unknown>
+      if (!res.ok) {
+        throw new Error(typeof raw?.error === 'string' ? raw.error : 'Upload failed')
+      }
+      const newAsset: Asset = {
+        id: String(raw.id),
+        type: raw.type as Asset['type'],
+        cdn_url: String(raw.cdn_url ?? ''),
+        metadata:
+          raw.metadata && typeof raw.metadata === 'object' && !Array.isArray(raw.metadata)
+            ? (raw.metadata as Asset['metadata'])
+            : {},
+        created_at: typeof raw.created_at === 'string' ? raw.created_at : new Date().toISOString(),
+      }
       setProject(p => p ? { ...p, assets: [...(p.assets || []), newAsset] } : p)
+      if (newAsset.cdn_url !== objectUrl) {
+        URL.revokeObjectURL(objectUrl)
+      }
       setUploadSuccess(`"${file.name}" added!`)
       setTimeout(() => setUploadSuccess(''), 5000)
-    } catch {
-      setUploadError('Upload failed.')
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'Upload failed.')
     } finally {
       setUploading(false)
       e.target.value = ''
@@ -583,9 +618,9 @@ export default function ProjectEditorPage({ params }: { params: { id: string } }
                       <img src={asset.cdn_url} alt="" className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-ivory/60 text-xs truncate font-mono">{asset.metadata.original_name || 'image'}</p>
+                      <p className="text-ivory/60 text-xs truncate font-mono">{assetMeta(asset).original_name || 'image'}</p>
                       <div className="flex items-center gap-1.5 mt-0.5">
-                        {asset.metadata.is_hero && (
+                        {assetMeta(asset).is_hero && (
                           <span className="flex items-center gap-0.5 text-gold text-xs">
                             <Star size={9} className="fill-gold" /> hero
                           </span>
@@ -622,7 +657,7 @@ export default function ProjectEditorPage({ params }: { params: { id: string } }
                       <Box size={16} className="text-gold" strokeWidth={1.5} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-ivory/70 text-xs truncate font-mono">{asset.metadata.original_name || 'model.glb'}</p>
+                      <p className="text-ivory/70 text-xs truncate font-mono">{assetMeta(asset).original_name || 'model.glb'}</p>
                       <p className="text-gold/50 text-xs">3D Model · viewable in hero</p>
                     </div>
                     <button
@@ -656,7 +691,7 @@ export default function ProjectEditorPage({ params }: { params: { id: string } }
                     <div className="w-14 h-10 rounded overflow-hidden flex-shrink-0 bg-obsidian-700">
                       <img src={asset.cdn_url} alt="" className="w-full h-full object-cover" />
                     </div>
-                    <p className="text-ivory/60 text-xs truncate font-mono flex-1 min-w-0">{asset.metadata.original_name || 'floor-plan'}</p>
+                    <p className="text-ivory/60 text-xs truncate font-mono flex-1 min-w-0">{assetMeta(asset).original_name || 'floor-plan'}</p>
                     <button
                       type="button"
                       onClick={() => handleDeleteAsset(asset.id)}
